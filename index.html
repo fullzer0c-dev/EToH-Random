@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>EToH Assistant</title>
+<title>EToH Assistant + Easter Eggs + Video</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 
@@ -14,6 +14,7 @@ body {
   color:white;
   font-family:'Orbitron';
   text-align:center;
+  user-select: none;
 }
 
 canvas {
@@ -79,13 +80,16 @@ select:hover, button:hover {
   display:flex;
   align-items:center;
   justify-content:center;
-  background:rgba(20,20,20,0.7);
+  background:rgba(20,20,20,0.8);
   border:2px solid white;
   border-radius:12px;
   backdrop-filter:blur(10px);
   box-shadow:0 0 10px white;
   transform:scale(0);
   animation:pop 0.4s forwards;
+  font-weight:bold;
+  cursor:pointer;
+  text-align:center;
 }
 
 .card.selected {
@@ -103,39 +107,11 @@ select:hover, button:hover {
 h1 { text-shadow:0 0 15px white; }
 #result { margin-top:15px; font-size:20px; text-shadow:0 0 10px white; }
 
-/* Рикролл кнопка + мини плеер */
-#rickrollWrapper {
-  width:80%;
-  max-width:600px;
-  margin:20px auto;
-}
-
-#rickrollButton {
+#myVideoWrapper iframe {
   width:100%;
-  padding:15px;
-  font-size:18px;
-  font-weight:bold;
-  background:rgba(20,20,20,0.7);
-  border:2px solid white;
+  height:180px;
   border-radius:12px;
-  backdrop-filter:blur(8px);
-  box-shadow:0 0 10px white;
-  color:white;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-#rickrollButton:hover {
-  box-shadow:0 0 25px white;
-}
-
-#rickrollPlayer {
-  width:100%;
-  height:0;
-  margin-top:15px;
   border:none;
-  border-radius:12px;
-  transition:height 0.5s;
 }
 </style>
 </head>
@@ -158,8 +134,8 @@ h1 { text-shadow:0 0 15px white; }
 </select>
 <select id="scSelect">
   <option value="All">All towers (SC + not SC)</option>
-  <option value="SC">only SC</option>
-  <option value="NonSC">only not SC</option>
+  <option value="SC">Only SC</option>
+  <option value="NonSC">Only not SC</option>
 </select>
 
 <br>
@@ -171,16 +147,15 @@ h1 { text-shadow:0 0 15px white; }
 
 <h2 id="result"></h2>
 
-<h2>🎵 Free robux?</h2>
-<div id="rickrollWrapper">
-  <button id="rickrollButton">CLICK HERE TO GET FREE ROBUXES!!!</button>
-  <iframe id="rickrollPlayer" src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<h2>🎬 Your Video</h2>
+<div id="myVideoWrapper">
+  <iframe id="myVideoPlayer" src="https://www.youtube.com/embed/nj3CE2Y5dYE?autoplay=0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
 
 </div>
 
 <script>
-// 🌌 ПАРАЛЛАКС
+// 🌌 PARALLAX STARS
 function createStars(canvasId, count, speed){
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
@@ -216,7 +191,8 @@ createStars("stars1",50,0.2);
 createStars("stars2",40,0.5);
 createStars("stars3",30,1);
 
-// ----------- ТАВЕРЫ -----------
+// ---------------------
+// Example tower list
 const List = [
   {tower:"ToG", from:"Purgatorio"},
   {tower:"ToME", from:"Purgatorio"},
@@ -837,13 +813,20 @@ const List = [
   {tower:"#PoMTR", from:"Windswept Peak Tower Rush"},
 ];
 
+// Easter eggs
+const easterEggs = [
+  { text:"Rickroll!", chance:0.05, video:"https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&autoplay=1" },
+  { text:"You found a secret!", chance:0.02, video:"https://www.youtube.com/embed/dQw4w9WgXcQ" },
+  { text:"LOL Surprise!", chance:0.03 }
+];
+
 function getType(name){
   if(name.startsWith("T")) return "Tower";
   if(name.startsWith("S")) return "Steeple";
   if(name.startsWith("C")) return "Citadel";
 }
 
-// FROM
+// FROM select
 const fromSelect = document.getElementById('fromSelect');
 const fromList = [...new Set(List.map(t=>t.from))];
 fromSelect.innerHTML = `<option value="All">Every world</option>`;
@@ -854,7 +837,7 @@ fromList.forEach(f=>{
   fromSelect.appendChild(opt);
 });
 
-// ----------- ВЫБОР ТАВЕРОВ -----------
+// ----------- SELECT TOWERS -----------
 function start(){
   const from = fromSelect.value;
   const type = document.getElementById('typeSelect').value;
@@ -881,13 +864,28 @@ function start(){
   cardsDiv.innerHTML="";
   result.innerText="Selecting...";
 
-  if(filtered.length===0){ result.innerText="No towers found,try to reset filtres."; return; }
+  if(filtered.length===0){ result.innerText="No towers found, try resetting filters."; return; }
 
   const elements = filtered.map(t=>{
     const el = document.createElement('div');
     el.className="card";
     el.innerText = t.tower;
     cardsDiv.appendChild(el);
+
+    // Easter egg on click
+    el.addEventListener("click",(e)=>{
+      e.preventDefault();
+      easterEggs.forEach(egg=>{
+        if(Math.random()<egg.chance){
+          result.innerText = "🎉 Easter egg: " + egg.text;
+          if(egg.video){
+            const rickPlayer = document.getElementById("myVideoPlayer");
+            rickPlayer.src = egg.video;
+          }
+        }
+      });
+    });
+
     return el;
   });
 
@@ -900,15 +898,6 @@ function start(){
     if(i>30){ clearInterval(anim); result.innerText="🎯 Selected: " + elements[current].innerText; }
   },100);
 }
-
-// ----------- РИКРОЛЛ КНОПКА -----------
-const rickButton = document.getElementById("rickrollButton");
-const rickPlayer = document.getElementById("rickrollPlayer");
-rickPlayer.style.height="0px";
-
-rickButton.addEventListener("click",()=>{
-  rickPlayer.style.height="180px";
-});
 </script>
 
 </body>
