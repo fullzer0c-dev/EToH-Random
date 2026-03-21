@@ -2,120 +2,61 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>EToH Assistant</title>
-
+<title>EToH Assistant + EasterEggs</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-
 <style>
-body {
-  margin:0;
-  overflow:hidden;
-  background:#000;
-  color:white;
-  font-family:'Orbitron';
-  text-align:center;
-  user-select: none;
-}
+body { margin:0; overflow:hidden; background:#000; color:white; font-family:'Orbitron'; user-select:none; }
+canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
 
-canvas {
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index:0;
-}
-
-#ui { position:relative; z-index:2; }
-
-select, button {
-  margin:10px;
-  padding:12px 18px;
-  background:rgba(20,20,20,0.6);
-  color:white;
-  border:2px solid white;
-  border-radius:12px;
-  backdrop-filter:blur(8px);
-  box-shadow:0 0 10px white;
-  transition:0.3s;
-  cursor:pointer;
-}
-
-select:hover, button:hover {
-  box-shadow:0 0 25px white;
-}
-
-#cardsWrapper {
-  width:80%;
-  max-width:900px;
-  height:300px;
-  margin:20px auto;
-  overflow-y:auto;
-  border:2px solid white;
-  border-radius:12px;
-  backdrop-filter:blur(6px);
-  box-shadow:0 0 15px white;
-  background:rgba(0,0,0,0.4);
-}
-
-#cardsWrapper::-webkit-scrollbar {
-  width:8px;
-}
-#cardsWrapper::-webkit-scrollbar-thumb {
-  background:white;
-  border-radius:10px;
-}
-
-#cards {
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  padding:10px;
-}
-
-.card {
-  width:120px;
-  height:150px;
-  margin:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(20,20,20,0.8);
-  border:2px solid white;
-  border-radius:12px;
-  backdrop-filter:blur(10px);
-  box-shadow:0 0 10px white;
-  transform:scale(0);
-  animation:pop 0.4s forwards;
-  font-weight:bold;
-  cursor:pointer;
-  text-align:center;
-}
-
-.card.selected {
-  background:white;
-  color:black;
-  transform:scale(1.2);
-  box-shadow:0 0 25px white;
-}
-
-@keyframes pop {
-  from {transform:scale(0);}
-  to {transform:scale(1);}
+#ui {
+  position: relative;
+  z-index: 2;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* центрирование интерфейса */
 }
 
 h1 { text-shadow:0 0 15px white; }
-#result { margin-top:15px; font-size:20px; text-shadow:0 0 10px white; }
+h2 { text-shadow:0 0 10px white; }
 
-#myVideoWrapper iframe {
-  width:320px;
-  height:180px;
-  border-radius:12px;
-  border:none;
+/* Filters */
+.filters-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center; /* центрируем фильтры */
+  margin-bottom: 15px;
 }
+.filter-wrapper { 
+  display:flex; flex-direction:column; border:2px solid white; border-radius:12px; background:rgba(20,20,20,0.6); padding:10px; max-height:200px; overflow-y:auto; width:220px; 
+}
+.filter-wrapper h3 { margin:0 0 5px 0; text-align:center; }
+.option { margin:5px 0; padding:5px 10px; border:1px solid white; border-radius:8px; cursor:pointer; transition:0.3s; background:rgba(30,30,30,0.6); text-align:center; }
+.option.active { background:white; color:black; box-shadow:0 0 10px white; }
+.option:hover { background:rgba(50,50,50,0.9); }
+
+/* Cards */
+#cardsWrapper { width:80%; max-width:900px; height:300px; margin:20px auto; overflow-y:auto; border:2px solid white; border-radius:12px; backdrop-filter:blur(6px); box-shadow:0 0 15px white; background:rgba(0,0,0,0.4); }
+#cards { display:flex; flex-wrap:wrap; justify-content:center; padding:10px; }
+.card { width:120px; height:150px; margin:10px; display:flex; align-items:center; justify-content:center; background:rgba(20,20,20,0.8); border:2px solid white; border-radius:12px; backdrop-filter:blur(10px); box-shadow:0 0 10px white; transform:scale(0); animation:pop 0.4s forwards; font-weight:bold; cursor:pointer; text-align:center; transition: transform 0.3s, box-shadow 0.3s, background 0.3s; }
+.card:hover { transform:scale(1.15); box-shadow:0 0 25px white; background:rgba(50,50,50,0.9); }
+.card.selected { background:white; color:black; transform:scale(1.2); box-shadow:0 0 25px white; }
+@keyframes pop { from {transform:scale(0);} to {transform:scale(1);} }
+
+/* Button */
+button#selectButton { margin-top:10px; padding:15px 30px; font-size:20px; font-weight:bold; background:rgba(20,20,20,0.7); border:2px solid white; border-radius:12px; backdrop-filter:blur(8px); box-shadow:0 0 10px white; color:white; cursor:pointer; transition:0.3s; }
+button#selectButton:hover { box-shadow:0 0 30px white; background:rgba(50,50,50,0.9); }
+
+/* Video */
+#myVideoWrapper iframe { width:480px; height:270px; border-radius:12px; border:none; margin-top:20px; }
+
+/* Scrollbars */
+.filter-wrapper::-webkit-scrollbar, #cardsWrapper::-webkit-scrollbar { width:8px; }
+.filter-wrapper::-webkit-scrollbar-thumb, #cardsWrapper::-webkit-scrollbar-thumb { background:white; border-radius:10px; }
+
 </style>
 </head>
-
 <body>
 
 <canvas id="stars1"></canvas>
@@ -125,74 +66,67 @@ h1 { text-shadow:0 0 15px white; }
 <div id="ui">
 <h1>🌌 EToH Assistant</h1>
 
-<select id="fromSelect"></select>
-<select id="typeSelect">
-  <option value="All">Every type</option>
-  <option value="Tower">Tower</option>
-  <option value="Steeple">Steeple</option>
-  <option value="Citadel">Citadel</option>
-</select>
-<select id="scSelect">
-  <option value="All">All towers (SC + not SC)</option>
-  <option value="SC">Only SC</option>
-  <option value="NonSC">Only not SC</option>
-</select>
-
-<br>
-<button onclick="start()">🎴 Select</button>
-
-<div id="cardsWrapper">
-  <div id="cards"></div>
+<div class="filters-container">
+  <div class="filter-wrapper">
+    <h3>World (From)</h3>
+    <div id="fromFilters"></div>
+  </div>
+  <div class="filter-wrapper">
+    <h3>Type</h3>
+    <div id="typeFilters"></div>
+  </div>
+  <div class="filter-wrapper">
+    <h3>Soul-Crushing</h3>
+    <div id="scFilters"></div>
+  </div>
 </div>
 
+<button id="selectButton" onclick="start()">🎴 Select</button>
+
+<div id="cardsWrapper"><div id="cards"></div></div>
 <h2 id="result"></h2>
 
-<h2>🎬Site Show</h2>
+<h2>🎬 Site Show</h2>
 <div id="myVideoWrapper">
   <iframe id="myVideoPlayer" src="https://www.youtube.com/embed/nj3CE2Y5dYE?autoplay=0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
 
-</div>
+<audio id="audioAtmos" loop>
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-// 🌌 PARALLAX STARS
-function createStars(canvasId, count, speed){
-  const canvas = document.getElementById(canvasId);
-  const ctx = canvas.getContext("2d");
-  let w = canvas.width = window.innerWidth;
-  let h = canvas.height = window.innerHeight;
-
-  let stars = [];
-  for(let i=0;i<count;i++){
-    stars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*2});
-  }
-
+// PARALLAX STARS
+let mouseX=0, mouseY=0;
+document.addEventListener("mousemove", e => { mouseX=e.clientX; mouseY=e.clientY; });
+function createStars(canvasId,count,speed){
+  const canvas=document.getElementById(canvasId);
+  const ctx=canvas.getContext("2d");
+  let w=canvas.width=window.innerWidth;
+  let h=canvas.height=window.innerHeight;
+  let stars=[];
+  for(let i=0;i<count;i++){ stars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*2}); }
   function animate(){
     ctx.clearRect(0,0,w,h);
+    const offsetX = (mouseX-w/2)/50;
+    const offsetY = (mouseY-h/2)/50;
     for(let s of stars){
       ctx.beginPath();
-      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle="white";
-      ctx.fill();
+      ctx.arc(s.x+offsetX,s.y+offsetY,s.r,0,Math.PI*2);
+      ctx.fillStyle="white"; ctx.fill();
       s.y -= speed;
       if(s.y < 0){ s.y = h; s.x = Math.random()*w; }
     }
     requestAnimationFrame(animate);
   }
-
   animate();
-  window.addEventListener("resize",()=>{
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  });
+  window.addEventListener("resize",()=>{ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; });
 }
-
 createStars("stars1",50,0.2);
 createStars("stars2",40,0.5);
 createStars("stars3",30,1);
 
-// ---------------------
-// Example tower list
+// DATA
 const List = [
   {tower:"ToG", from:"Purgatorio"},
   {tower:"ToME", from:"Purgatorio"},
@@ -812,93 +746,93 @@ const List = [
   {tower:"#SoMTR", from:"Windswept Peak Tower Rush"},
   {tower:"#PoMTR", from:"Windswept Peak Tower Rush"},
 ];
+const easterEggs=[{text:"Rickroll!",chance:0.05,video:"https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&autoplay=1"}];
 
-// Easter eggs
-const easterEggs = [
-  { text:"Rickroll!", chance:0.05, video:"https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&autoplay=1" },
-  { text:"You found a secret!", chance:0.02, video:"https://www.youtube.com/embed/OAva7ttQiYg?rel=0&autoplay=1" },
-  { text:"LOL Surprise!", chance:0.03 }
-];
+function getType(name){ if(name.startsWith("T")) return "Tower"; if(name.startsWith("S")) return "Steeple"; if(name.startsWith("C")) return "Citadel"; return "Unknown"; }
 
-function getType(name){
-  if(name.startsWith("T")) return "Tower";
-  if(name.startsWith("S")) return "Steeple";
-  if(name.startsWith("C")) return "Citadel";
-}
-
-// FROM select
-const fromSelect = document.getElementById('fromSelect');
-const fromList = [...new Set(List.map(t=>t.from))];
-fromSelect.innerHTML = `<option value="All">Every world</option>`;
-fromList.forEach(f=>{
-  const opt = document.createElement('option');
-  opt.value = f;
-  opt.innerText = f;
-  fromSelect.appendChild(opt);
-});
-
-// ----------- SELECT TOWERS -----------
-function start(){
-  const from = fromSelect.value;
-  const type = document.getElementById('typeSelect').value;
-  const scFilter = document.getElementById('scSelect').value;
-
-  const filtered = List.filter(t => {
-    const tType = getType(t.tower);
-    const isSC = !!t.sc;
-
-    const fromOk = (from==="All" || t.from===from);
-    const typeOk = (type==="All" || tType===type);
-
-    let scOk = false;
-    if(scFilter==="All") scOk = true;
-    if(scFilter==="SC") scOk = isSC;
-    if(scFilter==="NonSC") scOk = !isSC;
-
-    return fromOk && typeOk && scOk;
+// CREATE FILTERS
+function createFilterList(containerId, values){
+  const container=document.getElementById(containerId);
+  values.forEach(val=>{
+    const div=document.createElement("div");
+    div.className="option";
+    div.innerText=val;
+    div.dataset.value=val;
+    div.addEventListener("click",()=>{div.classList.toggle("active");});
+    container.appendChild(div);
   });
+}
+createFilterList("fromFilters",[...new Set(List.map(t=>t.from))]);
+createFilterList("typeFilters",[...new Set(List.map(t=>getType(t.tower)))]);
+createFilterList("scFilters",[...new Set(List.map(t=>t.sc).filter(s=>s))]);
 
-  const cardsDiv = document.getElementById('cards');
-  const result = document.getElementById('result');
+// START SELECTION
+function start(){
+  const selectedFrom=[...document.querySelectorAll("#fromFilters .option.active")].map(e=>e.dataset.value);
+  const selectedType=[...document.querySelectorAll("#typeFilters .option.active")].map(e=>e.dataset.value);
+  const selectedSC=[...document.querySelectorAll("#scFilters .option.active")].map(e=>e.dataset.value);
 
-  cardsDiv.innerHTML="";
+  const result=document.getElementById("result");
+  const cardsDiv=document.getElementById("cards");
+  cardsDiv.innerHTML=""; 
   result.innerText="Selecting...";
 
-  if(filtered.length===0){ result.innerText="No towers found, try resetting filters."; return; }
+  // Если ни одна галочка не выбрана во всех фильтрах
+  if(selectedFrom.length===0 && selectedType.length===0 && selectedSC.length===0){
+    result.innerText="Nothing found, please check filters.";
+    return;
+  }
+
+  const filtered = List.filter(t=>{
+    const type=getType(t.tower);
+    let okFrom = selectedFrom.length===0 || selectedFrom.includes(t.from);
+    let okType = selectedType.length===0 || selectedType.includes(type);
+
+    // SC логика: если галочка выбрана, показываем только SC; если не выбрана, показываем и обычные
+    let hasSC = !!t.sc;
+    let okSC = false;
+    if(selectedSC.length===0){ okSC = true; } // все показываем
+    else if(hasSC){ okSC = selectedSC.includes(t.sc); } // SC совпадает
+    else { okSC = false; } // обычный без SC, если SC фильтр есть — не показываем
+    return okFrom && okType && okSC;
+  });
+
+  if(filtered.length===0){
+    result.innerText="Nothing found, please check filters.";
+    return;
+  }
 
   const elements = filtered.map(t=>{
-    const el = document.createElement('div');
-    el.className="card";
-    el.innerText = t.tower;
-    cardsDiv.appendChild(el);
-
-    // Easter egg on click
-    el.addEventListener("click",(e)=>{
-      e.preventDefault();
-      easterEggs.forEach(egg=>{
-        if(Math.random()<egg.chance){
-          result.innerText = "🎉 Easter egg: " + egg.text;
-          if(egg.video){
-            const rickPlayer = document.getElementById("myVideoPlayer");
-            rickPlayer.src = egg.video;
-          }
+    const el=document.createElement("div");
+    el.className="card"; 
+    el.innerText=t.tower;
+    el.addEventListener("click",()=>{
+      // Easter Egg check
+      easterEggs.forEach(e=>{
+        if(Math.random()<e.chance){
+          document.getElementById("myVideoPlayer").src=e.video;
         }
       });
     });
-
+    cardsDiv.appendChild(el); 
     return el;
   });
 
-  let i=0, current=0;
-  const anim = setInterval(()=>{
+  // Анимация выбора
+  let i=0,current=0;
+  const anim=setInterval(()=>{
     elements.forEach(e=>e.classList.remove('selected'));
-    current = Math.floor(Math.random()*elements.length);
+    current=Math.floor(Math.random()*elements.length);
     elements[current].classList.add('selected');
     i++;
     if(i>30){ clearInterval(anim); result.innerText="🎯 Selected: " + elements[current].innerText; }
   },100);
 }
-</script>
 
+// AUDIO
+const audio=document.getElementById("audioAtmos");
+audio.volume=0.2; // потише
+document.body.addEventListener("click",()=>{audio.play();},{once:true});
+</script>
 </body>
 </html>
