@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>EToH Assistant + Рикролл кнопка</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  overflow:hidden;
+  background:#000;
+  color:white;
+  font-family:'Orbitron';
+  text-align:center;
+}
+
+canvas {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+
+#ui { position:relative; z-index:2; }
+
+select, button {
+  margin:10px;
+  padding:12px 18px;
+  background:rgba(20,20,20,0.6);
+  color:white;
+  border:2px solid white;
+  border-radius:12px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 0 10px white;
+  transition:0.3s;
+  cursor:pointer;
+}
+
+select:hover, button:hover {
+  box-shadow:0 0 25px white;
+}
+
+#cardsWrapper {
+  width:80%;
+  max-width:900px;
+  height:300px;
+  margin:20px auto;
+  overflow-y:auto;
+  border:2px solid white;
+  border-radius:12px;
+  backdrop-filter:blur(6px);
+  box-shadow:0 0 15px white;
+  background:rgba(0,0,0,0.4);
+}
+
+#cardsWrapper::-webkit-scrollbar {
+  width:8px;
+}
+#cardsWrapper::-webkit-scrollbar-thumb {
+  background:white;
+  border-radius:10px;
+}
+
+#cards {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  padding:10px;
+}
+
+.card {
+  width:120px;
+  height:150px;
+  margin:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,20,20,0.7);
+  border:2px solid white;
+  border-radius:12px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 10px white;
+  transform:scale(0);
+  animation:pop 0.4s forwards;
+}
+
+.card.selected {
+  background:white;
+  color:black;
+  transform:scale(1.2);
+  box-shadow:0 0 25px white;
+}
+
+@keyframes pop {
+  from {transform:scale(0);}
+  to {transform:scale(1);}
+}
+
+h1 { text-shadow:0 0 15px white; }
+#result { margin-top:15px; font-size:20px; text-shadow:0 0 10px white; }
+
+/* Рикролл кнопка + мини плеер */
+#rickrollWrapper {
+  width:80%;
+  max-width:600px;
+  margin:20px auto;
+}
+
+#rickrollButton {
+  width:100%;
+  padding:15px;
+  font-size:18px;
+  font-weight:bold;
+  background:rgba(20,20,20,0.7);
+  border:2px solid white;
+  border-radius:12px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 0 10px white;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+#rickrollButton:hover {
+  box-shadow:0 0 25px white;
+}
+
+#rickrollPlayer {
+  width:100%;
+  height:0;
+  margin-top:15px;
+  border:none;
+  border-radius:12px;
+  transition:height 0.5s;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="stars1"></canvas>
+<canvas id="stars2"></canvas>
+<canvas id="stars3"></canvas>
+
+<div id="ui">
+<h1>🌌 EToH Assistant</h1>
+
+<select id="fromSelect"></select>
+<select id="typeSelect">
+  <option value="All">Every type</option>
+  <option value="Tower">Tower</option>
+  <option value="Steeple">Steeple</option>
+  <option value="Citadel">Citadel</option>
+</select>
+<select id="scSelect">
+  <option value="All">All towers (SC + not SC)</option>
+  <option value="SC">only SC</option>
+  <option value="NonSC">only not SC</option>
+</select>
+
+<br>
+<button onclick="start()">🎴 Select</button>
+
+<div id="cardsWrapper">
+  <div id="cards"></div>
+</div>
+
+<h2 id="result"></h2>
+
+<h2>🎵 Free robux?</h2>
+<div id="rickrollWrapper">
+  <button id="rickrollButton">CLICK HERE TO GET FREE ROBUXES!!!</button>
+  <iframe id="rickrollPlayer" src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+</div>
+
+<script>
+// 🌌 ПАРАЛЛАКС
+function createStars(canvasId, count, speed){
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  let w = canvas.width = window.innerWidth;
+  let h = canvas.height = window.innerHeight;
+
+  let stars = [];
+  for(let i=0;i<count;i++){
+    stars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*2});
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,w,h);
+    for(let s of stars){
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle="white";
+      ctx.fill();
+      s.y -= speed;
+      if(s.y < 0){ s.y = h; s.x = Math.random()*w; }
+    }
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+  window.addEventListener("resize",()=>{
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  });
+}
+
+createStars("stars1",50,0.2);
+createStars("stars2",40,0.5);
+createStars("stars3",30,1);
+
+// ----------- ТАВЕРЫ -----------
+const List = [
+  {tower:"ToG", from:"Purgatorio"},
+  {tower:"ToME", from:"Purgatorio"},
+  {tower:"ToB", from:"Purgatorio"},
+  {tower:"ToCD", from:"Purgatorio"},
+  {tower:"ToBM", from:"Purgatorio"},
+  {tower:"ToVP", from:"Purgatorio"},
+  {tower:"ToKP", from:"Purgatorio"},
+  {tower:"ToNSA", from:"Purgatorio"},
+  {tower:"ToKTS", from:"Purgatorio"},
+  {tower:"ToDAN", from:"Purgatorio"},
+  {tower:"CoV", from:"Purgatorio"},
+  {tower:"TNF", from:"Purgatorio"},
+  {tower:"ToAST", from:"Ring 1"},
+  {tower:"ToA", from:"Ring 1"},
+  {tower:"ToM", from:"Ring 1"},
+  {tower:"ToNI", from:"Ring 1"},
+  {tower:"ToH", from:"Ring 1"},
+  {tower:"ToK", from:"Ring 1"},
+  {tower:"ToKY", from:"Ring 1"},
+  {tower:"ToS", from:"Ring 1"},
+  {tower:"ToSP", from:"Ring 1"},
+  {tower:"ToR", from:"Ring 1"},
+  {tower:"ToIE", from:"Ring 1"},
+  {tower:"CoLS", from:"Ring 1"},
+  {tower:"ToTS", from:"Ring 1"},
+  {tower:"ToIG", from:"Ring 1",sc:"insane"},
+  {tower:"NeaT", from:"Ring 1"},
+  {tower:"SoMD", from:"Forgotten Ridge"},
+  {tower:"ToJGF", from:"Forgotten Ridge"},
+  {tower:"SoLW", from:"Forgotten Ridge"},
+  {tower:"SoP", from:"Forgotten Ridge"},
+  {tower:"SoUR", from:"Forgotten Ridge"},
+  {tower:"ToII", from:"Forgotten Ridge"},
+  {tower:"SoWP", from:"Forgotten Ridge"},
+  {tower:"ToV", from:"Forgotten Ridge"},
+  {tower:"ToTC", from:"Forgotten Ridge"},
+  {tower:"SoC", from:"Forgotten Ridge"},
+  {tower:"SoHP", from:"Forgotten Ridge"},
+  {tower:"ToIS", from:"Forgotten Ridge"},
+  {tower:"ToDE", from:"Forgotten Ridge"},
+  {tower:"CoWN", from:"Forgotten Ridge"},
+  {tower:"SoTP", from:"Forgotten Ridge"},
+  {tower:"ToMB", from:"Forgotten Ridge",sc:"insane"},
+  {tower:"TIPAT", from:"Forgotten Ridge"},
+  {tower:"ToPS", from:"Ring 2"},
+  {tower:"ToBH", from:"Ring 2"},
+  {tower:"ToOH", from:"Ring 2"},
+  {tower:"ToCH", from:"Ring 2"},
+  {tower:"ToFaF", from:"Ring 2"},
+  {tower:"ToT", from:"Ring 2"},
+  {tower:"ToDD", from:"Ring 2"},
+  {tower:"ToSD", from:"Ring 2"},
+  {tower:"ToTF", from:"Ring 2"},
+  {tower:"ToES", from:"Ring 2"},
+  {tower:"CoWS", from:"Ring 2"},
+  {tower:"ToDC", from:"Ring 2",sc:'insane'},
+  {tower:"ToDC", from:"Ring 2"},
+  {tower:"MaT", from:"Ring 2"},
+  {tower:"SoBJ", from:"Garden of Eeshoi"},
+  {tower:"SoDS", from:"Garden of Eeshoi"},
+  {tower:"SoIF", from:"Garden of Eeshoi"},
+  {tower:"SoO", from:"Garden of Eeshoi"},
+  {tower:"SoN", from:"Garden of Eeshoi"},
+  {tower:"SoOA", from:"Garden of Eeshoi"},
+  {tower:"SoGP", from:"Garden of Eeshoi"},
+  {tower:"SoFF", from:"Garden of Eeshoi"},
+  {tower:"SoLIQ", from:"Garden of Eeshoi"},
+  {tower:"SoVV", from:"Garden of Eeshoi"},
+  {tower:"SoFW", from:"Garden of Eeshoi"},
+  {tower:"ToPA", from:"Garden of Eeshoi"},
+  {tower:"SoBA", from:"Garden of Eeshoi"},
+  {tower:"NeaF", from:"Garden of Eeshoi"},
+  {tower:"ToFT", from:"Ring 3"},
+  {tower:"ToIC", from:"Ring 3"},
+  {tower:"ToAT", from:"Ring 3"},
+  {tower:"ToDS", from:"Ring 3"},
+  {tower:"ToF", from:"Ring 3"},
+  {tower:"ToWER", from:"Ring 3"},
+  {tower:"ToSI", from:"Ring 3"},
+  {tower:"ToWH", from:"Ring 3"},
+  {tower:"ToLD", from:"Ring 3"},
+  {tower:"ToD", from:"Ring 3"},
+  {tower:"CoHaD", from:"Ring 3"},
+  {tower:"ToC", from:"Ring 3",sc:'insane'},
+  {tower:"TaT", from:"Ring 3"},
+  {tower:"ToSH", from:"Ring 4"},
+  {tower:"ToGG", from:"Ring 4"},
+  {tower:"ToTM", from:"Ring 4"},
+  {tower:"ToE", from:"Ring 4"},
+  {tower:"ToL", from:"Ring 4"},
+  {tower:"ToLL", from:"Ring 4"},
+  {tower:"ToDaD", from:"Ring 4"},
+  {tower:"ToHF", from:"Ring 4"},
+  {tower:"CoU", from:"Ring 4"},
+  {tower:"ToO", from:"Ring 4"},
+  {tower:"ToNP", from:"Ring 4"},
+  {tower:"ToCN", from:"Ring 4"},
+  {tower:"ToVS", from:"Ring 4",sc:"insane"},
+  {tower:"ToI", from:"Ring 4",sc:"teriffying"},
+  {tower:"WBaT", from:"Ring 4"},
+  {tower:"SoRIS", from:"Silent Abyss"},
+  {tower:"SoRA", from:"Silent Abyss"},
+  {tower:"ToAI", from:"Silent Abyss"},
+  {tower:"SoD", from:"Silent Abyss"},
+  {tower:"ToTINT", from:"Silent Abyss"},
+  {tower:"SoGL", from:"Silent Abyss"},
+  {tower:"SoXA", from:"Silent Abyss"},
+  {tower:"SoWG", from:"Silent Abyss"},
+  {tower:"ToSW", from:"Silent Abyss"},
+  {tower:"SoII", from:"Silent Abyss"},
+  {tower:"ToTD", from:"Silent Abyss"},
+  {tower:"SoMA", from:"Silent Abyss"},
+  {tower:"SoMB", from:"Silent Abyss"},
+  {tower:"ToNV", from:"Ring 5"},
+  {tower:"ToTR", from:"Ring 5"},
+  {tower:"ToRS", from:"Ring 5"},
+  {tower:"ToDM", from:"Ring 5"},
+  {tower:"ToOC", from:"Ring 5"},
+  {tower:"ToFF", from:"Ring 5"},
+  {tower:"ToEA", from:"Ring 5"},
+  {tower:"ToTH", from:"Ring 5"},
+  {tower:"ToGaH", from:"Ring 5"},
+  {tower:"ToFO", from:"Ring 5"},
+  {tower:"CoCR", from:"Ring 5"},
+  {tower:"ToIB", from:"Ring 5",sc:"insane"},
+  {tower:"ToFN", from:"Ring 5",sc:"teriffying"},
+  {tower:"LAT", from:"Ring 5"},
+  {tower:"ToEW", from:"Lost River"},
+  {tower:"ToTST", from:"Lost River"},
+  {tower:"CoIS", from:"Lost River"},
+  {tower:"ToLOZ", from:"Lost River"},
+  {tower:"ToDL", from:"Lost River"},
+  {tower:"ToOO", from:"Lost River"},
+  {tower:"ToWaW", from:"Lost River"},
+  {tower:"ToCS", from:"Lost River"},
+  {tower:"ToTEM", from:"Lost River"},
+  {tower:"ToTJ", from:"Lost River"},
+  {tower:"ToUH", from:"Lost River",sc:"insane"},
+  {tower:"ToFJ", from:"Ring 6"},
+  {tower:"ToEP", from:"Ring 6"},
+  {tower:"ToRR", from:"Ring 6"},
+  {tower:"ToTI", from:"Ring 6"},
+  {tower:"ToADF", from:"Ring 6"},
+  {tower:"ToISC", from:"Ring 6"},
+  {tower:"ToDR", from:"Ring 6"},
+  {tower:"ToFS", from:"Ring 6"},
+  {tower:"ToN", from:"Ring 6"},
+  {tower:"CoSR", from:"Ring 6"},
+  {tower:"ToSM", from:"Ring 6",sc:"extream"},
+  {tower:"ToIM", from:"Ring 6",sc:"teriffying"},
+  {tower:"FNaT", from:"Ring 6"},
+  {tower:"ToFZ", from:"Ashen Towerworks"},
+  {tower:"ToVT", from:"Ashen Towerworks"},
+  {tower:"ToCWC", from:"Ashen Towerworks"},
+  {tower:"ToWMT", from:"Ashen Towerworks"},
+  {tower:"ToSR", from:"Ashen Towerworks"},
+  {tower:"ToWIA", from:"Ashen Towerworks"},
+  {tower:"ToWoW", from:"Ashen Towerworks"},
+  {tower:"ToLLL", from:"Ashen Towerworks"},
+  {tower:"ToFSF", from:"Ashen Towerworks"},
+  {tower:"ToCB", from:"Ashen Towerworks"},
+  {tower:"ToRH", from:"Ashen Towerworks"},
+  {tower:"ToMD", from:"Ashen Towerworks"},
+  {tower:"ToWF", from:"Ashen Towerworks",sc:"extream"},
+  {tower:"ToRB", from:"Ring 7"},
+  {tower:"ToCC", from:"Ring 7"},
+  {tower:"ToFL", from:"Ring 7"},
+  {tower:"ToDA", from:"Ring 7"},
+  {tower:"ToOOO", from:"Ring 7"},
+  {tower:"ToNGUE", from:"Ring 7"},
+  {tower:"ToNED", from:"Ring 7"},
+  {tower:"ToU", from:"Ring 7"},
+  {tower:"CoTE", from:"Ring 7"},
+  {tower:"ToYV", from:"Ring 7"},
+  {tower:"ToEH", from:"Ring 7",sc:"insane"},
+  {tower:"ToTB", from:"Ring 7",sc:"teriffying"},
+  {tower:"ToER", from:"Ring 7",sc:"catastrophic"},
+  {tower:"FFaST", from:"Ring 7"},
+  {tower:"ToSSS", from:"Ring 8"},
+  {tower:"ToNBA", from:"Ring 8"},
+  {tower:"ToVF", from:"Ring 8"},
+  {tower:"ToVA", from:"Ring 8"},
+  {tower:"ToAA", from:"Ring 8"},
+  {tower:"CoCHS", from:"Ring 8"},
+  {tower:"ToUS", from:"Ring 8"},
+  {tower:"ToIII", from:"Ring 8"},
+  {tower:"ToVE", from:"Ring 8"},
+  {tower:"ToMT", from:"Ring 8"},
+  {tower:"ToSO", from:"Ring 8",sc:"extream"},
+  {tower:"ToEI", from:"Ring 8",sc:"extream"},
+  {tower:"ToGF", from:"Ring 8",sc:"catastrophic"},
+  {tower:"ToLR", from:"The Starlit Archives"},
+  {tower:"ToYLFW", from:"The Starlit Archives"},
+  {tower:"ToPLA", from:"The Starlit Archives"},
+  {tower:"SoALD", from:"The Starlit Archives"},
+  {tower:"SoBC", from:"The Starlit Archives"},
+  {tower:"SoTMN", from:"The Starlit Archives"},
+  {tower:"SoTMM", from:"The Starlit Archives"},
+  {tower:"ToTUTU", from:"The Starlit Archives"},
+  {tower:"ToIR", from:"The Starlit Archives"},
+  {tower:"SoIB", from:"The Starlit Archives"},
+  {tower:"ToADE", from:"The Starlit Archives"},
+  {tower:"ToWR", from:"The Starlit Archives"},
+  {tower:"ToFFEE", from:"The Starlit Archives"},
+  {tower:"ToHWH", from:"The Starlit Archives"},
+  {tower:"SoFB", from:"The Starlit Archives"},
+  {tower:"SoCV", from:"The Starlit Archives"},
+  {tower:"ToGO", from:"Ring 9"},
+  {tower:"ToBBB", from:"Ring 9"},
+  {tower:"ToQT", from:"Ring 9"},
+  {tower:"CoL", from:"Ring 9"},
+  {tower:"ToPP", from:"Ring 9"},
+  {tower:"ToHA", from:"Ring 9",sc:"insane"},
+  {tower:"ToBT", from:"Ring 9",sc:"insane"},
+  {tower:"ToCA", from:"Ring 9",sc:"insane"},
+  {tower:"ToFACT", from:"Ring 9",sc:"extream"},
+  {tower:"ToBK", from:"Ring 9",sc:"extream"},
+  {tower:"ToJE", from:"Ring 9",sc:"teriffying"},
+  {tower:"ToNS", from:"Ring 9",sc:"teriffying"},
+  {tower:"ToAM", from:"Ring 9",sc:"catastrophic"},
+  {tower:"ToCR", from:"Ring 9",sc:"catastrophic"},
+  {tower:"ToCP", from:"Ring 9",sc:"catastrophic"},
+  {tower:"ToZD", from:"Zone 1"},
+  {tower:"ToPHaT", from:"Zone 1"},
+  {tower:"ToP", from:"Zone 1"},
+  {tower:"ToHS", from:"Zone 1"},
+  {tower:"ToMH", from:"Zone 1"},
+  {tower:"ToCO", from:"Zone 1"},
+  {tower:"ToYS", from:"Zone 1"},
+  {tower:"ToAV", from:"Zone 1"},
+  {tower:"ToWEL", from:"Zone 1"},
+  {tower:"ToUT", from:"Zone 1"},
+  {tower:"ToED", from:"Zone 1"},
+  {tower:"ToRNI", from:"Zone 1"},
+  {tower:"CoP", from:"Zone 1"},
+  {tower:"ToZ", from:"Zone 1"},
+  {tower:"SaT", from:"Zone 1"},
+  {tower:"ToTL", from:"Zone 1",sc:"insane"},
+  {tower:"SoZZP", from:"Steelspire Horizon"},
+  {tower:"SoGC", from:"Steelspire Horizon"},
+  {tower:"ToSL", from:"Steelspire Horizon"},
+  {tower:"ToQR", from:"Steelspire Horizon"},
+  {tower:"ToSaT", from:"Steelspire Horizon"},
+  {tower:"ToFH", from:"Steelspire Horizon"},
+  {tower:"ToCBTS", from:"Steelspire Horizon"},
+  {tower:"ToTFC", from:"Steelspire Horizon"},
+  {tower:"SoBCM", from:"Steelspire Horizon"},
+  {tower:"SoDR", from:"Steelspire Horizon"},
+  {tower:"ToWE", from:"Steelspire Horizon"},
+  {tower:"SoSK", from:"Steelspire Horizon"},
+  {tower:"ToFP", from:"Steelspire Horizon"},
+  {tower:"ToNoS", from:"Steelspire Horizon"},
+  {tower:"CoT", from:"Steelspire Horizon"},
+  {tower:"ToGK", from:"Steelspire Horizon"},
+  {tower:"ToSRT", from:"Steelspire Horizon",sc:"insane"},
+  {tower:"ToVR", from:"Zone 2"},
+  {tower:"ToSA", from:"Zone 2"},
+  {tower:"ToGLA", from:"Zone 2"},
+  {tower:"ToTA", from:"Zone 2"},
+  {tower:"ToUD", from:"Zone 2"},
+  {tower:"ToDaC", from:"Zone 2"},
+  {tower:"ToPF", from:"Zone 2"},
+  {tower:"ToSaS", from:"Zone 2"},
+  {tower:"CoGS", from:"Zone 2"},
+  {tower:"ToEE", from:"Zone 2"},
+  {tower:"ToAZ", from:"Zone 2"},
+  {tower:"ToTT", from:"Zone 2"},
+  {tower:"ToGD", from:"Zone 2"},
+  {tower:"ToCM", from:"Zone 2"},
+  {tower:"ToDT", from:"Zone 2",sc:"insane"},
+  {tower:"SoBT", from:"Arcane Area"},
+  {tower:"SoAS", from:"Arcane Area"},
+  {tower:"SoAP", from:"Arcane Area"},
+  {tower:"SoRO", from:"Arcane Area"},
+  {tower:"SoTC", from:"Arcane Area"},
+  {tower:"SoME", from:"Arcane Area"},
+  {tower:"SoCA", from:"Arcane Area"},
+  {tower:"SoWC", from:"Arcane Area"},
+  {tower:"SoMC", from:"Arcane Area"},
+  {tower:"ToIA", from:"Arcane Area"},
+  {tower:"ToSFU", from:"Zone 3"},
+  {tower:"ToOD", from:"Zone 3"},
+  {tower:"ToBB", from:"Zone 3"},
+  {tower:"ToCOF", from:"Zone 3"},
+  {tower:"ToCCC", from:"Zone 3"},
+  {tower:"ToX", from:"Zone 3"},
+  {tower:"ToDH", from:"Zone 3"},
+  {tower:"ToMA", from:"Zone 3"},
+  {tower:"ToCaS", from:"Zone 3"},
+  {tower:"ToRCH", from:"Zone 3"},
+  {tower:"CoTS", from:"Zone 3"},
+  {tower:"ToMC", from:"Zone 3"},
+  {tower:"ToQC", from:"Zone 3"},
+  {tower:"ToIO", from:"Zone 3"},
+  {tower:"ToCaUP", from:"Zone 3"},
+  {tower:"ToHH", from:"Zone 3",sc:"extream"},
+  {tower:"SoMM", from:"Paradise Atoll"},
+  {tower:"SoUV", from:"Paradise Atoll"},
+  {tower:"SoW", from:"Paradise Atoll"},
+  {tower:"ToCIAD", from:"Paradise Atoll"},
+  {tower:"SoAU", from:"Paradise Atoll"},
+  {tower:"SoSIS", from:"Paradise Atoll"},
+  {tower:"SoAR", from:"Paradise Atoll"},
+  {tower:"ToHP", from:"Paradise Atoll"},
+  {tower:"SoHS", from:"Paradise Atoll"},
+  {tower:"SoDI", from:"Paradise Atoll"},
+  {tower:"ToCI", from:"Paradise Atoll"},
+  {tower:"SoUC", from:"Paradise Atoll"},
+  {tower:"SoCF", from:"Paradise Atoll"},
+  {tower:"ToTTT", from:"Paradise Atoll"},
+  {tower:"SoDD", from:"Paradise Atoll"},
+  {tower:"SoUB", from:"Paradise Atoll"},
+  {tower:"ToFSC", from:"Zone 4"},
+  {tower:"ToAC", from:"Zone 4"},
+  {tower:"ToFaST", from:"Zone 4"},
+  {tower:"ToUID", from:"Zone 4"},
+  {tower:"ToET", from:"Zone 4"},
+  {tower:"ToWW", from:"Zone 4"},
+  {tower:"ToPC", from:"Zone 4"},
+  {tower:"ToMIM", from:"Zone 4"},
+  {tower:"ToSS", from:"Zone 4"},
+  {tower:"ToDDD", from:"Zone 4"},
+  {tower:"ToFG", from:"Zone 4"},
+  {tower:"CoQ", from:"Zone 4"},
+  {tower:"ToTV", from:"Zone 4"},
+  {tower:"ToIF", from:"Zone 4",sc:"insane"},
+  {tower:"ToAAA", from:"Zone 4",sc:"extream"},
+  {tower:"ToST", from:"Zone 5"},
+  {tower:"ToSSSS", from:"Zone 5"},
+  {tower:"ToFV", from:"Zone 5"},
+  {tower:"ToBS", from:"Zone 5"},
+  {tower:"ToSTS", from:"Zone 5"},
+  {tower:"ToUE", from:"Zone 5"},
+  {tower:"ToHK", from:"Zone 5"},
+  {tower:"ToHE", from:"Zone 5"},
+  {tower:"ToGT", from:"Zone 5"},
+  {tower:"CoCE", from:"Zone 5"},
+  {tower:"ToAO", from:"Zone 5"},
+  {tower:"ToBaBT", from:"Zone 5"},
+  {tower:"ToZA", from:"Zone 5"},
+  {tower:"ToPZ", from:"Zone 5",sc:"insane"},
+  {tower:"ToAR", from:"Zone 5",sc:"teriffying"},
+  {tower:"ToFD", from:"Zone 6"},
+  {tower:"ToRC", from:"Zone 6"},
+  {tower:"ToCF", from:"Zone 6"},
+  {tower:"ToBIBI", from:"Zone 6"},
+  {tower:"ToAS", from:"Zone 6"},
+  {tower:"ToHM", from:"Zone 6"},
+  {tower:"CoTaW", from:"Zone 6"},
+  {tower:"ToHL", from:"Zone 6"},
+  {tower:"ToW", from:"Zone 6"},
+  {tower:"ToAF", from:"Zone 6"},
+  {tower:"ToMO", from:"Zone 6"},
+  {tower:"ToBC", from:"Zone 6"},
+  {tower:"ToTDA", from:"Zone 6",sc:"extream"},
+  {tower:"ToMM", from:"Zone 6",sc:"teriffying"},
+  {tower:"ToJ", from:"Zone 7"},
+  {tower:"ToRW", from:"Zone 7"},
+  {tower:"ToSV", from:"Zone 7"},
+  {tower:"ToBR", from:"Zone 7"},
+  {tower:"ToDF", from:"Zone 7"},
+  {tower:"ToGM", from:"Zone 7"},
+  {tower:"ToCE", from:"Zone 7"},
+  {tower:"ToWS", from:"Zone 7"},
+  {tower:"ToY", from:"Zone 7"},
+  {tower:"ToCMC", from:"Zone 7"},
+  {tower:"ToSaPS", from:"Zone 7"},
+  {tower:"ToUI", from:"Zone 7"},
+  {tower:"CoACT", from:"Zone 7"},
+  {tower:"ToFM", from:"Zone 7",sc:"teriffying"},
+  {tower:"ToUA", from:"Zone 7",sc:"teriffying"},
+  {tower:"ToMIT", from:"Zone 8"},
+  {tower:"ToCT", from:"Zone 8"},
+  {tower:"ToATD", from:"Zone 8"},
+  {tower:"ToXM", from:"Zone 8"},
+  {tower:"ToGV", from:"Zone 8"},
+  {tower:"ToFR", from:"Zone 8"},
+  {tower:"ToON", from:"Zone 8"},
+  {tower:"ToNEF", from:"Zone 8"},
+  {tower:"ToML", from:"Zone 8"},
+  {tower:"ToOV", from:"Zone 8"},
+  {tower:"CoPE", from:"Zone 8"},
+  {tower:"ToTaSM", from:"Zone 8"},
+  {tower:"ToNR", from:"Zone 8"},
+  {tower:"ToRER", from:"Zone 8",sc:"insane"},
+  {tower:"ToAE", from:"Zone 8",sc:"extream"},
+  {tower:"ToDIE", from:"Zone 8",sc:"catastrophic"},
+  {tower:"ToABCD", from:"Zone 9"},
+  {tower:"ToDTD", from:"Zone 9"},
+  {tower:"ToLS", from:"Zone 9"},
+  {tower:"ToBL", from:"Zone 9"},
+  {tower:"ToSRD", from:"Zone 9"},
+  {tower:"ToNN", from:"Zone 9"},
+  {tower:"ToFCB", from:"Zone 9"},
+  {tower:"ToFU", from:"Zone 9"},
+  {tower:"ToEC", from:"Zone 9"},
+  {tower:"ToBBBB", from:"Zone 9"},
+  {tower:"ToMF", from:"Zone 9"},
+  {tower:"CoIS", from:"Zone 9"},
+  {tower:"ToVITE", from:"Zone 9"},
+  {tower:"ToHR", from:"Zone 9",sc:"insane"},
+  {tower:"ToPB", from:"Zone 9",sc:"extream"},
+  {tower:"ToWWW", from:"Zone 9",sc:"teriffying"},
+  {tower:"ToEMP", from:"Zone 9",sc:"catastrophic"},
+  {tower:"ToCZ", from:"Zone 10"},
+  {tower:"ToRL", from:"Zone 10"},
+  {tower:"ToIT", from:"Zone 10"},
+  {tower:"ToVV", from:"Zone 10"},
+  {tower:"ToETU", from:"Zone 10"},
+  {tower:"ToMN", from:"Zone 10"},
+  {tower:"ToOTTF", from:"Zone 10"},
+  {tower:"ToTDF", from:"Zone 10"},
+  {tower:"ToPI", from:"Zone 10"},
+  {tower:"ToPL", from:"Zone 10"},
+  {tower:"CoOTWI", from:"Zone 10"},
+  {tower:"ToRoMW", from:"Zone 10",sc:"insane"},
+  {tower:"ToTHT", from:"Zone 10",sc:"insane"},
+  {tower:"ToBP", from:"Zone 10",sc:"extream"},
+  {tower:"ToCaV", from:"Zone 10",sc:"teriffying"},
+  {tower:"ToRT", from:"Zone 10",sc:"catastrophic"},
+  {tower:"ToNF", from:"The Eternal Abyss"},
+  {tower:"TTTT", from:"The Eternal Abyss"},
+  {tower:"ToDN", from:"The Eternal Abyss"},
+  {tower:"ToIHR", from:"The Eternal Abyss"},
+  {tower:"ToEtA", from:"The Eternal Abyss"},
+  {tower:"!SoPC", from:"The Eternal Abyss"},
+  {tower:"ToQQ", from:"The Eternal Abyss"},
+  {tower:"ToUP", from:"The Eternal Abyss"},
+  {tower:"ToVD", from:"The Eternal Abyss"},
+  {tower:"ToCL", from:"The Eternal Abyss"},
+  {tower:"ToMEN", from:"The Eternal Abyss"},
+  {tower:"ToTo", from:"The Eternal Abyss"},
+  {tower:"ToOT", from:"The Eternal Abyss"},
+  {tower:"ToMMM", from:"The Eternal Abyss"},
+  {tower:"BEAT", from:"The Eternal Abyss"},
+  {tower:"ToHG", from:"The Eternal Abyss"},
+  {tower:"ToTW", from:"The Eternal Abyss"},
+  {tower:"ToMN", from:"The Eternal Abyss"},
+  {tower:"!SoNB", from:"The Eternal Abyss"},
+  {tower:"ToTSTL", from:"The Eternal Abyss"},
+  {tower:"ToPR", from:"The Eternal Abyss"},
+  {tower:"ToFA", from:"The Eternal Abyss"},
+  {tower:"ToQD", from:"The Eternal Abyss"},
+  {tower:"ToLL", from:"The Eternal Abyss"},
+  {tower:"ToSR", from:"The Eternal Abyss"},
+  {tower:"ToUM", from:"The Eternal Abyss"},
+  {tower:"ToQU", from:"The Eternal Abyss"},
+  {tower:"ToZS", from:"The Eternal Abyss"},
+  {tower:"!CoTEC", from:"The Eternal Abyss"},
+  {tower:"!CoCBF", from:"The Eternal Abyss"},
+  {tower:"ToMIH", from:"The Eternal Abyss"},
+  {tower:"ToW", from:"The Eternal Abyss"},
+  {tower:"ToID", from:"The Eternal Abyss"},
+  {tower:"ToMH", from:"The Eternal Abyss"},
+  {tower:"!STONE", from:"The Eternal Abyss"},
+  {tower:"ToF", from:"The Eternal Abyss"},
+  {tower:"ToINE", from:"The Eternal Abyss"},
+  {tower:"ToTCR", from:"The Eternal Abyss"},
+  {tower:"ToMDC", from:"Pit Of Misery"},
+  {tower:"ToCP", from:"Pit Of Misery"},
+  {tower:"ToPI", from:"Pit Of Misery"},
+  {tower:"ToSUT", from:"Pit Of Misery"},
+  {tower:"ToRUS", from:"Pit Of Misery"},
+  {tower:"ToUA", from:"Pit Of Misery"},
+  {tower:"ToXIC", from:"Pit Of Misery"},
+  {tower:"ToRRR", from:"Pit Of Misery"},
+  {tower:"ToSA", from:"Pit Of Misery"},
+  {tower:"ToCUP", from:"Pit Of Misery"},
+  {tower:"ToATC", from:"Pit Of Misery"},
+  {tower:"!STONE_V", from:"Pit Of Misery"},
+  {tower:"ToVM", from:"Pit Of Misery"},
+  {tower:"ToLJ", from:"Pit Of Misery"},
+  {tower:"ToG", from:"Pit Of Misery"},
+  {tower:"ToOLC", from:"Pit Of Misery"},
+  {tower:"ToGF", from:"Pit Of Misery"},
+  {tower:"WAT", from:"Pit Of Misery"},
+  {tower:"ToMM", from:"Pit Of Misery"},
+  {tower:"ToPC", from:"Pit Of Misery"},
+  {tower:"ToQ", from:"Pit Of Misery"},
+  {tower:"ToTP", from:"Pit Of Misery"},
+  {tower:"ToCR", from:"Pit Of Misery"},
+  {tower:"ToVH", from:"Pit Of Misery"},
+  {tower:"ToSE", from:"Pit Of Misery"},
+  {tower:"ToER", from:"Pit Of Misery"},
+  {tower:"ToJJ", from:"Pit Of Misery"},
+  {tower:"ToTH", from:"Pit Of Misery"},
+  {tower:"!SoCB", from:"Pit Of Misery"},
+  {tower:"ToFP", from:"Pit Of Misery"},
+  {tower:"ToCE", from:"Pit Of Misery"},
+  {tower:"ToLP", from:"Pit Of Misery"},
+  {tower:"ToWM", from:"Pit Of Misery"},
+  {tower:"ToTRP", from:"Pit Of Misery"},
+  {tower:"ToVL", from:"Pit Of Misery"},
+  {tower:"ToTF", from:"Pit Of Misery"},
+  {tower:"ToEV", from:"Pit Of Misery"},
+  {tower:"UT", from:"Pit Of Misery"},
+  {tower:"ToSD", from:"Pit Of Misery"},
+  {tower:"ToP", from:"Pit Of Misery"},
+  {tower:"ToBF", from:"Pit Of Misery"},
+  {tower:"!CoIV", from:"Pit Of Misery"},
+  {tower:"ToSF", from:"Pit Of Misery"},
+  {tower:"ToOEZ", from:"Timeless Manor"},
+  {tower:"ToDC", from:"Timeless Manor"},
+  {tower:"ToSW", from:"Timeless Manor"},
+  {tower:"ToFR", from:"Timeless Manor"},
+  {tower:"ToFL", from:"Timeless Manor"},
+  {tower:"ToAD", from:"Timeless Manor"},
+  {tower:"ToBD", from:"Timeless Manor"},
+  {tower:"ToTC", from:"Timeless Manor"},
+  {tower:"!SoED", from:"Timeless Manor"},
+  {tower:"ToQTP", from:"Timeless Manor"},
+  {tower:"ToPT", from:"Timeless Manor"},
+  {tower:"ToRD", from:"Timeless Manor"},
+  {tower:"ToTDD", from:"Timeless Manor"},
+  {tower:"ToUC", from:"Timeless Manor"},
+  {tower:"BOAT", from:"Timeless Manor"},
+  {tower:"ToED", from:"Timeless Manor"},
+  {tower:"ToEA", from:"Timeless Manor"},
+  {tower:"ToO", from:"Timeless Manor"},
+  {tower:"ToFE", from:"Timeless Manor"},
+  {tower:"ToEO", from:"Timeless Manor"},
+  {tower:"UTT", from:"Timeless Manor"},
+  {tower:"ToHaHA", from:"Timeless Manor"},
+  {tower:"KS", from:"Timeless Manor"},
+  {tower:"ToPA", from:"Timeless Manor"},
+  {tower:"ToHN", from:"Timeless Manor"},
+  {tower:"!CoLDC", from:"Timeless Manor"},
+  {tower:"ToFI", from:"Timeless Manor"},
+  {tower:"ToRRA", from:"Timeless Manor"},
+  {tower:"ToOE", from:"Timeless Manor"},
+  {tower:"!STONE_C", from:"Timeless Manor"},
+  {tower:"ToC", from:"Timeless Manor"},
+  {tower:"ToCOA", from:"Timeless Manor"},
+  {tower:"!SoPPP", from:"Timeless Manor"},
+  {tower:"ToMB", from:"Timeless Manor"},
+  {tower:"ToTB", from:"Timeless Manor"},
+  {tower:"ToFB", from:"Timeless Manor"},
+  {tower:"DT", from:"Timeless Manor"},
+  {tower:"ToBE", from:"Timeless Manor"},
+  {tower:"ToDD", from:"Timeless Manor"},
+  {tower:"!SoD", from:"Timeless Manor"},
+  {tower:"!SS", from:"Timeless Manor"},
+  {tower:"ToDF", from:"Timeless Manor"},
+  {tower:"ToSQ", from:"Timeless Manor"},
+  {tower:"ToIG", from:"Timeless Manor"},
+  {tower:"ToTT", from:"Timeless Manor"},
+  {tower:"GCoGDC", from:"Timeless Manor"},
+  {tower:"ToTQFP", from:"Timeless Manor"},
+  {tower:"ToIZ", from:"Timeless Manor"},
+  {tower:"!SoEA", from:"Starry Night"},
+  {tower:"ToRM", from:"Starry Night"},
+  {tower:"ToKIT", from:"Starry Night"},
+  {tower:"ToTV", from:"Starry Night"},
+  {tower:"ToSYS", from:"Starry Night"},
+  {tower:"!SoGB", from:"Starry Night"},
+  {tower:"ToBM", from:"Starry Night"},
+  {tower:"ToD", from:"Starry Night"},
+  {tower:"ToCA", from:"Starry Night"},
+  {tower:"TETO", from:"Starry Night"},
+  {tower:"ToPH", from:"Starry Night"},
+  {tower:"ToAT", from:"Starry Night"},
+  {tower:"ToK", from:"Starry Night"},
+  {tower:"ToQI", from:"Starry Night"},
+  {tower:"ToUL", from:"Starry Night"},
+  {tower:"ToTR", from:"Starry Night"},
+  {tower:"ToCD", from:"Starry Night"},
+  {tower:"ToHC", from:"Starry Night"},
+  {tower:"!CoW", from:"Starry Night"},
+  {tower:"ToCV", from:"Starry Night"},
+  {tower:"ToIX", from:"Starry Night"},
+  {tower:"ToCCC", from:"Starry Night"},
+  {tower:"ToSPRL", from:"Starry Night"},
+  {tower:"ToIR", from:"Starry Night"},
+  {tower:"ToRRRR", from:"Starry Night"},
+  {tower:"ToRE", from:"Starry Night"},
+  {tower:"ToTM", from:"Starry Night"},
+  {tower:"ToM", from:"Starry Night"},
+  {tower:"!SoQC", from:"Starry Night"},
+  {tower:"ToLR", from:"Starry Night"},
+  {tower:"#PTR", from:"Great Inferno Tower Rush"},
+  {tower:"#R1TR", from:"Great Inferno Tower Rush"},
+  {tower:"#FRTR", from:"Great Inferno Tower Rush"},
+  {tower:"#R2TR", from:"Great Inferno Tower Rush"},
+  {tower:"#GoETR", from:"Great Inferno Tower Rush"},
+  {tower:"#R3TR", from:"Great Inferno Tower Rush"},
+  {tower:"#R4TR", from:"Great Inferno Tower Rush"},
+  {tower:"#SATR", from:"Great Inferno Tower Rush"},
+  {tower:"#R5TR", from:"Great Inferno Tower Rush"},
+  {tower:"#R14MTR", from:"Great Inferno Tower Rush"},
+  {tower:"#LRTR", from:"Great Inferno Tower Rush"},
+  {tower:"#R6TR", from:"Great Inferno Tower Rush"},
+  {tower:"#ATwTR", from:"Great Inferno Tower Rush"},
+  {tower:"#R7TR", from:"Great Inferno Tower Rush"},
+  {tower:"#R8TR", from:"Great Inferno Tower Rush"},
+  {tower:"#TSATR", from:"Great Inferno Tower Rush"},
+  {tower:"#R9TR", from:"Great Inferno Tower Rush"},
+  {tower:"#Z1TR", from:"Spatial System Tower Rush"},
+  {tower:"#SHTR", from:"Spatial System Tower Rush"},
+  {tower:"#Z2TR", from:"Spatial System Tower Rush"},
+  {tower:"#AATR", from:"Spatial System Tower Rush"},
+  {tower:"#Z3TR", from:"Spatial System Tower Rush"},
+  {tower:"#PATR", from:"Spatial System Tower Rush"},
+  {tower:"#Z4TR", from:"Spatial System Tower Rush"},
+  {tower:"#Z5TR", from:"Spatial System Tower Rush"},
+  {tower:"#DSotMTR(ok)", from:"Spatial System Tower Rush"},
+  {tower:"#Z6TR", from:"Spatial System Tower Rush"},
+  {tower:"#Z7TR", from:"Spatial System Tower Rush"},
+  {tower:"#Z8TR", from:"Spatial System Tower Rush"},
+  {tower:"#Z9TR", from:"Spatial System Tower Rush"},
+  {tower:"#Z10TR", from:"Spatial System Tower Rush"},
+  {tower:"#TLCTR", from:"Windswept Peak Tower Rush"},
+  {tower:"#TLSTR", from:"Windswept Peak Tower Rush"},
+  {tower:"#TLTTR", from:"Windswept Peak Tower Rush"},
+  {tower:"#TLNTR", from:"Windswept Peak Tower Rush"},
+  {tower:"#LFTR", from:"Windswept Peak Tower Rush"},
+  {tower:"#SoMTR", from:"Windswept Peak Tower Rush"},
+  {tower:"#PoMTR", from:"Windswept Peak Tower Rush"},
+];
+
+function getType(name){
+  if(name.startsWith("T")) return "Tower";
+  if(name.startsWith("S")) return "Steeple";
+  if(name.startsWith("C")) return "Citadel";
+}
+
+// FROM
+const fromSelect = document.getElementById('fromSelect');
+const fromList = [...new Set(List.map(t=>t.from))];
+fromSelect.innerHTML = `<option value="All">Every world</option>`;
+fromList.forEach(f=>{
+  const opt = document.createElement('option');
+  opt.value = f;
+  opt.innerText = f;
+  fromSelect.appendChild(opt);
+});
+
+// ----------- ВЫБОР ТАВЕРОВ -----------
+function start(){
+  const from = fromSelect.value;
+  const type = document.getElementById('typeSelect').value;
+  const scFilter = document.getElementById('scSelect').value;
+
+  const filtered = List.filter(t => {
+    const tType = getType(t.tower);
+    const isSC = !!t.sc;
+
+    const fromOk = (from==="All" || t.from===from);
+    const typeOk = (type==="All" || tType===type);
+
+    let scOk = false;
+    if(scFilter==="All") scOk = true;
+    if(scFilter==="SC") scOk = isSC;
+    if(scFilter==="NonSC") scOk = !isSC;
+
+    return fromOk && typeOk && scOk;
+  });
+
+  const cardsDiv = document.getElementById('cards');
+  const result = document.getElementById('result');
+
+  cardsDiv.innerHTML="";
+  result.innerText="Selecting...";
+
+  if(filtered.length===0){ result.innerText="No towers found,try to reset filtres."; return; }
+
+  const elements = filtered.map(t=>{
+    const el = document.createElement('div');
+    el.className="card";
+    el.innerText = t.tower;
+    cardsDiv.appendChild(el);
+    return el;
+  });
+
+  let i=0, current=0;
+  const anim = setInterval(()=>{
+    elements.forEach(e=>e.classList.remove('selected'));
+    current = Math.floor(Math.random()*elements.length);
+    elements[current].classList.add('selected');
+    i++;
+    if(i>30){ clearInterval(anim); result.innerText="🎯 Selected: " + elements[current].innerText; }
+  },100);
+}
+
+// ----------- РИКРОЛЛ КНОПКА -----------
+const rickButton = document.getElementById("rickrollButton");
+const rickPlayer = document.getElementById("rickrollPlayer");
+rickPlayer.style.height="0px";
+
+rickButton.addEventListener("click",()=>{
+  rickPlayer.style.height="180px";
+});
+</script>
+
+</body>
+</html>
