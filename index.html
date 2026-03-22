@@ -1,1134 +1,2749 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <title>EToH Assistant By S1mclick</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
 <style>
+
 body { margin:0; overflow:hidden; background:#000; color:white; font-family:'Orbitron'; user-select:none; }
+
 canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
 
+
+
 #ui {
+
   position: relative;
+
   z-index: 2;
+
   padding: 20px;
+
   display: flex;
+
   flex-direction: column;
+
   align-items: center; /* центрирование интерфейса */
+
 }
+
+
 
 h1 { text-shadow:0 0 15px white; }
+
 h2 { text-shadow:0 0 10px white; }
 
+
+
 /* Filters */
+
 .filters-container {
+
   display: flex;
+
   gap: 20px;
+
   flex-wrap: wrap;
+
   justify-content: center; /* центрируем фильтры */
+
   margin-bottom: 15px;
+
 }
+
 .filter-wrapper { 
+
   display:flex; flex-direction:column; border:2px solid white; border-radius:12px; background:rgba(20,20,20,0.6); padding:10px; max-height:200px; overflow-y:auto; width:220px; 
+
 }
+
 .filter-wrapper h3 { margin:0 0 5px 0; text-align:center; }
+
 .option { margin:5px 0; padding:5px 10px; border:1px solid white; border-radius:8px; cursor:pointer; transition:0.3s; background:rgba(30,30,30,0.6); text-align:center; }
+
 .option.active { background:white; color:black; box-shadow:0 0 10px white; }
+
 .option:hover { background:rgba(50,50,50,0.9); }
 
+
+
 /* Cards */
+
 #cardsWrapper { width:80%; max-width:900px; height:300px; margin:20px auto; overflow-y:auto; border:2px solid white; border-radius:12px; backdrop-filter:blur(6px); box-shadow:0 0 15px white; background:rgba(0,0,0,0.4); }
+
 #cards { display:flex; flex-wrap:wrap; justify-content:center; padding:10px; }
+
 .card { width:120px; height:150px; margin:10px; display:flex; align-items:center; justify-content:center; background:rgba(20,20,20,0.8); border:2px solid white; border-radius:12px; backdrop-filter:blur(10px); box-shadow:0 0 10px white; transform:scale(0); animation:pop 0.4s forwards; font-weight:bold; cursor:pointer; text-align:center; transition: transform 0.3s, box-shadow 0.3s, background 0.3s; }
+
 .card:hover { transform:scale(1.15); box-shadow:0 0 25px white; background:rgba(50,50,50,0.9); }
+
 .card.selected { background:white; color:black; transform:scale(1.2); box-shadow:0 0 25px white; }
+
 @keyframes pop { from {transform:scale(0);} to {transform:scale(1);} }
 
+
+
 /* Button */
+
 button#selectButton { margin-top:10px; padding:15px 30px; font-size:20px; font-weight:bold; background:rgba(20,20,20,0.7); border:2px solid white; border-radius:12px; backdrop-filter:blur(8px); box-shadow:0 0 10px white; color:white; cursor:pointer; transition:0.3s; }
+
 button#selectButton:hover { box-shadow:0 0 30px white; background:rgba(50,50,50,0.9); }
 
+
+
 /* Video */
+
 #myVideoWrapper iframe { width:480px; height:270px; border-radius:12px; border:none; margin-top:20px; }
 
+
+
 /* Scrollbars */
+
 .filter-wrapper::-webkit-scrollbar, #cardsWrapper::-webkit-scrollbar { width:8px; }
+
 .filter-wrapper::-webkit-scrollbar-thumb, #cardsWrapper::-webkit-scrollbar-thumb { background:white; border-radius:10px; }
 
+
+
+#tips {
+
+  position: fixed;
+
+  bottom: 20px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  background: rgba(0,0,0,0.7);
+
+  border: 2px solid white;
+
+  border-radius: 12px;
+
+  padding: 10px 20px;
+
+  box-shadow: 0 0 10px white;
+
+  opacity: 0;
+
+  transition: 0.5s;
+
+  pointer-events: none;
+
+}
+
+
+
+#tips.show {
+
+  opacity: 1;
+
+}
+
+
+
+#finalCard {
+
+  position: fixed;
+
+  top: 50%;
+
+  left: 50%;
+
+  transform: translate(-50%, -50%) scale(0);
+
+  z-index: 999;
+
+  perspective: 1000px;
+
+  pointer-events: none;
+
+}
+
+
+
+#finalInner {
+
+  width: 180px;
+
+  height: 220px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  background: rgba(20,20,20,0.9);
+
+  border:2px solid white;
+
+  border-radius:16px;
+
+  box-shadow:0 0 30px white;
+
+  font-size:22px;
+
+  font-weight:bold;
+
+  transform: rotateY(180deg);
+
+  transition: transform 0.6s ease;
+
+}
+
+
+
+/* Появление */
+
+#finalCard.show {
+
+  transform: translate(-50%, -50%) scale(1.4);
+
+  animation: zoomIn 0.4s forwards;
+
+}
+
+
+
+@keyframes zoomIn {
+
+  0% { transform: translate(-50%, -50%) scale(0); }
+
+  80% { transform: translate(-50%, -50%) scale(1.5); }
+
+  100% { transform: translate(-50%, -50%) scale(1.2); }
+
+}
+
+
+
+/* Переворот */
+
+#finalInner.flip {
+
+  transform: rotateY(0deg);
+
+}
+
+
+
+/* ШЕЙК */
+
+@keyframes shake {
+
+  0% { transform: translate(0,0); }
+
+  20% { transform: translate(-5px, 3px); }
+
+  40% { transform: translate(5px, -3px); }
+
+  60% { transform: translate(-4px, 2px); }
+
+  80% { transform: translate(4px, -2px); }
+
+  100% { transform: translate(0,0); }
+
+}
+
+
+
+.shake {
+
+  animation: shake 0.4s;
+
+}
+
+
+
+.card.final {
+
+  position: fixed;
+
+  top: 50%;
+
+  left: 50%;
+
+  transform: translate(-50%, -50%) rotateY(180deg) scale(1.5);
+
+  z-index: 999;
+
+  transition: transform 0.6s ease;
+
+}
+
+
+
+.card.flip {
+
+  transform: translate(-50%, -50%) rotateY(0deg) scale(1.5);
+
+}
+
+
+
+@keyframes shake {
+
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+
+  25% { transform: translate(-48%, -52%) rotate(-2deg); }
+
+  50% { transform: translate(-52%, -48%) rotate(2deg); }
+
+  75% { transform: translate(-49%, -51%) rotate(-1deg); }
+
+  100% { transform: translate(-50%, -50%) rotate(0deg); }
+
+}
+
+
+
+.card.shake {
+
+  animation: shake 0.3s ease;
+
+}
+
+
+
 </style>
+
 </head>
+
 <body>
 
+
+
 <canvas id="stars1"></canvas>
+
 <canvas id="stars2"></canvas>
+
 <canvas id="stars3"></canvas>
 
+
+
 <div id="ui">
+
 <h1>🌌 EToH Assistant By S1mclick</h1>
 
+<h2 id="dailyTower"></h2>
+
+
+
 <div class="filters-container">
+
   <div class="filter-wrapper">
+
     <h3>World (From)</h3>
+
     <div id="fromFilters"></div>
+
   </div>
+
   <div class="filter-wrapper">
+
     <h3>Type</h3>
+
     <div id="typeFilters"></div>
+
   </div>
+
   <div class="filter-wrapper">
+
     <h3>Diffucults</h3>
+
     <div id="scFilters"></div>
+
   </div>
+
 </div>
+
+
 
 <button id="selectButton" onclick="start()">🎴 Select</button>
 
+
+
 <div id="cardsWrapper"><div id="cards"></div></div>
+
 <h2 id="result"></h2>
 
+
+
 <h2>🎬 Site Show</h2>
+
 <div id="myVideoWrapper">
+
   <iframe id="myVideoPlayer" src="https://www.youtube.com/embed/nj3CE2Y5dYE?autoplay=0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+
 </div>
 
+
+
+
+
 <audio id="audioAtmos" loop>
+
   <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+
 </audio>
 
+<div id="tips"></div>
+
 <script>
+
 // PARALLAX STARS
+
 let mouseX=0, mouseY=0;
+
 document.addEventListener("mousemove", e => { mouseX=e.clientX; mouseY=e.clientY; });
+
 function createStars(canvasId,count,speed){
+
   const canvas=document.getElementById(canvasId);
+
   const ctx=canvas.getContext("2d");
+
   let w=canvas.width=window.innerWidth;
+
   let h=canvas.height=window.innerHeight;
+
   let stars=[];
+
   for(let i=0;i<count;i++){ stars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*2}); }
+
   function animate(){
+
     ctx.clearRect(0,0,w,h);
+
     const offsetX = (mouseX-w/2)/50;
+
     const offsetY = (mouseY-h/2)/50;
+
     for(let s of stars){
+
       ctx.beginPath();
+
       ctx.arc(s.x+offsetX,s.y+offsetY,s.r,0,Math.PI*2);
+
       ctx.fillStyle="white"; ctx.fill();
+
       s.y -= speed;
+
       if(s.y < 0){ s.y = h; s.x = Math.random()*w; }
+
     }
+
     requestAnimationFrame(animate);
+
   }
+
   animate();
+
   window.addEventListener("resize",()=>{ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; });
+
 }
+
 createStars("stars1",50,0.2);
+
 createStars("stars2",40,0.5);
+
 createStars("stars3",30,1);
 
+
+
+
+
 // DATA
+
 // Use "Tower" To get tower's name,use "from" to get tower's area,use "sc" to give difficult
+
 const List = [
+
   {tower:"ToG", from:"Purgatorio",sc:"Easy"},
+
   {tower:"ToME", from:"Purgatorio",sc:"Easy"},
+
   {tower:"ToB", from:"Purgatorio",sc:"Easy"},
+
   {tower:"ToCD", from:"Purgatorio",sc:"Easy"},
+
   {tower:"ToBM", from:"Purgatorio",sc:"Medium"},
+
   {tower:"ToVP", from:"Purgatorio",sc:"Medium"},
+
   {tower:"ToKP", from:"Purgatorio",sc:"Medium"},
+
   {tower:"ToNSA", from:"Purgatorio",sc:"Medium"},
+
   {tower:"ToKTS", from:"Purgatorio",sc:"Hard"},
+
   {tower:"ToDAN", from:"Purgatorio",sc:"Hard"},
+
   {tower:"CoV", from:"Purgatorio",sc:"Difficult"},
+
   {tower:"TNF", from:"Purgatorio",sc:"Hard"},
+
   {tower:"ToAST", from:"Ring 1",sc:"Easy"},
+
   {tower:"ToA", from:"Ring 1",sc:"Easy"},
+
   {tower:"ToM", from:"Ring 1",sc:"Medium"},
+
   {tower:"ToNI", from:"Ring 1",sc:"Medium"},
+
   {tower:"ToH", from:"Ring 1",sc:"Hard"},
+
   {tower:"ToK", from:"Ring 1",sc:"Hard"},
+
   {tower:"ToKY", from:"Ring 1",sc:"Difficult"},
+
   {tower:"ToS", from:"Ring 1",sc:"Difficult"},
+
   {tower:"ToSP", from:"Ring 1",sc:"Challenging"},
+
   {tower:"ToR", from:"Ring 1",sc:"Challenging"},
+
   {tower:"ToIE", from:"Ring 1",sc:"Intense"},
+
   {tower:"CoLS", from:"Ring 1",sc:"Intense"},
+
   {tower:"ToTS", from:"Ring 1",sc:"Remorseless"},
+
   {tower:"ToIG", from:"Ring 1",sc:"insane"},
+
   {tower:"Will it be tower?(Not real tower)",sc:"extreme",from:"Ring 1"},
+
   {tower:"NeaT", from:"Ring 1",sc:"Easy"},
+
   {tower:"SoMD", from:"Forgotten Ridge",sc:"Easy"},
+
   {tower:"ToJGF", from:"Forgotten Ridge",sc:"Easy"},
+
   {tower:"SoLW", from:"Forgotten Ridge",sc:"Medium"},
+
   {tower:"SoP", from:"Forgotten Ridge",sc:"Medium"},
+
   {tower:"SoUR", from:"Forgotten Ridge",sc:"Hard"},
+
   {tower:"ToII", from:"Forgotten Ridge",sc:"Difficult"},
+
   {tower:"SoWP", from:"Forgotten Ridge",sc:"Difficult"},
+
   {tower:"ToV", from:"Forgotten Ridge",sc:"Difficult"},
+
   {tower:"ToTC", from:"Forgotten Ridge",sc:"Challenging"},
+
   {tower:"SoC", from:"Forgotten Ridge",sc:"Challenging"},
+
   {tower:"SoHP", from:"Forgotten Ridge",sc:"Intense"},
+
   {tower:"ToIS", from:"Forgotten Ridge",sc:"Intense"},
+
   {tower:"ToDE", from:"Forgotten Ridge",sc:"Intense"},
+
   {tower:"CoWN", from:"Forgotten Ridge",sc:"Intense"},
+
   {tower:"SoTP", from:"Forgotten Ridge",sc:"Remorseless"},
+
   {tower:"ToMB", from:"Forgotten Ridge",sc:"insane"},
+
   {tower:"TIPAT", from:"Forgotten Ridge",sc:"Hard"},
+
   {tower:"ToPS", from:"Ring 2",sc:"Medium"},
+
   {tower:"ToBH", from:"Ring 2",sc:"Hard"},
+
   {tower:"ToOH", from:"Ring 2",sc:"Hard"},
+
   {tower:"ToCH", from:"Ring 2",sc:"Difficult"},
+
   {tower:"ToFaF", from:"Ring 2",sc:"Challenging"},
+
   {tower:"ToT", from:"Ring 2",sc:"Challenging"},
+
   {tower:"ToDD", from:"Ring 2",sc:"Challenging"},
+
   {tower:"ToSD", from:"Ring 2",sc:"Challenging"},
+
   {tower:"ToTF", from:"Ring 2",sc:"Intense"},
+
   {tower:"ToES", from:"Ring 2",sc:"Remorseless"},
+
   {tower:"CoWS", from:"Ring 2",sc:"Remorseless"},
+
   {tower:"ToDC", from:"Ring 2",sc:'insane'},
+
   {tower:"MaT", from:"Ring 2",sc:"Easy"},
+
   {tower:"SoBJ", from:"Garden of Eeshoi",sc:"Easy"},
+
   {tower:"SoDS", from:"Garden of Eeshoi",sc:"Easy"},
+
   {tower:"SoIF", from:"Garden of Eeshoi",sc:"Medium"},
+
   {tower:"SoO", from:"Garden of Eeshoi",sc:"Medium"},
+
   {tower:"SoN", from:"Garden of Eeshoi",sc:"Medium"},
+
   {tower:"SoOA", from:"Garden of Eeshoi",sc:"Hard"},
+
   {tower:"SoGP", from:"Garden of Eeshoi",sc:"Hard"},
+
   {tower:"SoFF", from:"Garden of Eeshoi",sc:"Hard"},
+
   {tower:"SoLIQ", from:"Garden of Eeshoi",sc:"Hard"},
+
   {tower:"SoVV", from:"Garden of Eeshoi",sc:"Difficult"},
+
   {tower:"SoFW", from:"Garden of Eeshoi",sc:"Challenging"},
+
   {tower:"ToPA", from:"Garden of Eeshoi",sc:"Intense"},
+
   {tower:"SoBA", from:"Garden of Eeshoi",sc:"Intense"},
+
   {tower:"NeaF", from:"Garden of Eeshoi",sc:"Challenging"},
+
   {tower:"ToFT", from:"Ring 3",sc:"Easy"},
+
   {tower:"ToIC", from:"Ring 3",sc:"Medium"},
+
   {tower:"ToAT", from:"Ring 3",sc:"Medium"},
+
   {tower:"ToDS", from:"Ring 3",sc:"Medium"},
+
   {tower:"ToF", from:"Ring 3",sc:"Hard"},
+
   {tower:"ToWER", from:"Ring 3",sc:"Hard"},
+
   {tower:"ToSI", from:"Ring 3",sc:"Difficult"},
+
   {tower:"ToWH", from:"Ring 3",sc:"Difficult"},
+
   {tower:"ToLD", from:"Ring 3",sc:"Difficult"},
+
   {tower:"ToD", from:"Ring 3",sc:"Challenging"},
+
   {tower:"CoHaD", from:"Ring 3",sc:"Intense"},
+
   {tower:"ToC", from:"Ring 3",sc:'insane'},
+
   {tower:"TaT", from:"Ring 3",sc:"Intense"},
+
   {tower:"ToSH", from:"Ring 4",sc:"Easy"},
+
   {tower:"ToGG", from:"Ring 4",sc:"Medium"},
+
   {tower:"ToTM", from:"Ring 4",sc:"Hard"},
+
   {tower:"ToE", from:"Ring 4",sc:"Hard"},
+
   {tower:"ToL", from:"Ring 4",sc:"Difficult"},
+
   {tower:"ToLL", from:"Ring 4",sc:"Difficult"},
+
   {tower:"ToDaD", from:"Ring 4",sc:"Challenging"},
+
   {tower:"ToHF", from:"Ring 4",sc:"Intense"},
+
   {tower:"CoU", from:"Ring 4",sc:"Intense"},
+
   {tower:"ToO", from:"Ring 4",sc:"Intense"},
+
   {tower:"ToNP", from:"Ring 4",sc:"Remorseless"},
+
   {tower:"ToCN", from:"Ring 4",sc:"Remorseless"},
+
   {tower:"ToVS", from:"Ring 4",sc:"insane"},
+
   {tower:"ToI", from:"Ring 4",sc:"teriffying"},
+
   {tower:"WBaT", from:"Ring 4",sc:"Challenging"},
+
   {tower:"SoRIS", from:"Silent Abyss",sc:"Difficult"},
+
   {tower:"SoRA", from:"Silent Abyss",sc:"Difficult"},
+
   {tower:"ToAI", from:"Silent Abyss",sc:"Difficult"},
+
   {tower:"SoD", from:"Silent Abyss",sc:"Challenging"},
+
   {tower:"ToTINT", from:"Silent Abyss",sc:"Challenging"},
+
   {tower:"SoGL", from:"Silent Abyss",sc:"Challenging"},
+
   {tower:"SoXA", from:"Silent Abyss",sc:"Challenging"},
+
   {tower:"SoWG", from:"Silent Abyss",sc:"Intense"},
+
   {tower:"ToSW", from:"Silent Abyss",sc:"Intense"},
+
   {tower:"SoII", from:"Silent Abyss",sc:"Intense"},
+
   {tower:"ToTD", from:"Silent Abyss",sc:"Intense"},
+
   {tower:"SoMA", from:"Silent Abyss",sc:"Remorseless"},
+
   {tower:"SoMB", from:"Silent Abyss",sc:"Remorseless"},
+
   {tower:"ToNV", from:"Ring 5",sc:"Medium"},
+
   {tower:"ToTR", from:"Ring 5",sc:"Difficult"},
+
   {tower:"ToRS", from:"Ring 5",sc:"Difficult"},
+
   {tower:"ToDM", from:"Ring 5",sc:"Challenging"},
+
   {tower:"ToOC", from:"Ring 5",sc:"Challenging"},
+
   {tower:"ToFF", from:"Ring 5",sc:"Intense"},
+
   {tower:"ToEA", from:"Ring 5",sc:"Intense"},
+
   {tower:"ToTH", from:"Ring 5",sc:"Intense"},
+
   {tower:"ToGaH", from:"Ring 5",sc:"Remorseless"},
+
   {tower:"ToFO", from:"Ring 5",sc:"Remorseless"},
+
   {tower:"CoCR", from:"Ring 5",sc:"Remorseless"},
+
   {tower:"ToIB", from:"Ring 5",sc:"insane"},
+
   {tower:"ToFN", from:"Ring 5",sc:"teriffying"},
+
   {tower:"LAT", from:"Ring 5",sc:"Difficult"},
+
   {tower:"ToEW", from:"Lost River",sc:"Medium"},
+
   {tower:"ToTST", from:"Lost River",sc:"Hard"},
+
   {tower:"CoIS", from:"Lost River",sc:"Difficult"},
+
   {tower:"ToLOZ", from:"Lost River",sc:"Difficult"},
+
   {tower:"ToDL", from:"Lost River",sc:"Challenging"},
+
   {tower:"ToOO", from:"Lost River",sc:"Challenging"},
+
   {tower:"ToWaW", from:"Lost River",sc:"Intense"},
+
   {tower:"ToCS", from:"Lost River",sc:"Intense"},
+
   {tower:"ToTEM", from:"Lost River",sc:"Remorseless"},
+
   {tower:"ToTJ", from:"Lost River",sc:"Remorseless"},
+
   {tower:"ToUH", from:"Lost River",sc:"insane"},
+
   {tower:"ToFJ", from:"Ring 6",sc:"Hard"},
+
   {tower:"ToEP", from:"Ring 6",sc:"Difficult"},
+
   {tower:"ToRR", from:"Ring 6",sc:"Difficult"},
+
   {tower:"ToTI", from:"Ring 6",sc:"Challenging"},
+
   {tower:"ToADF", from:"Ring 6",sc:"Intense"},
+
   {tower:"ToISC", from:"Ring 6",sc:"Intense"},
+
   {tower:"ToDR", from:"Ring 6",sc:"Intense"},
+
   {tower:"ToFS", from:"Ring 6",sc:"Intense"},
+
   {tower:"ToN", from:"Ring 6",sc:"Remorseless"},
+
   {tower:"CoSR", from:"Ring 6",sc:"Remorseless"},
+
   {tower:"ToSM", from:"Ring 6",sc:"extreme"},
+
   {tower:"ToIM", from:"Ring 6",sc:"teriffying"},
+
   {tower:"FNaT", from:"Ring 6",sc:"Intense"},
+
   {tower:"ToFZ", from:"Ashen Towerworks",sc:"Medium"},
+
   {tower:"ToVT", from:"Ashen Towerworks",sc:"Hard"},
+
   {tower:"ToCWC", from:"Ashen Towerworks",sc:"Difficult"},
+
   {tower:"ToWMT", from:"Ashen Towerworks",sc:"Challenging"},
+
   {tower:"ToSR", from:"Ashen Towerworks",sc:"Intense"},
+
   {tower:"ToWIA", from:"Ashen Towerworks",sc:"Intense"},
+
   {tower:"ToWoW", from:"Ashen Towerworks",sc:"Intense"},
+
   {tower:"ToLLL", from:"Ashen Towerworks",sc:"Intense"},
+
   {tower:"ToFSF", from:"Ashen Towerworks",sc:"Remorseless"},
+
   {tower:"ToCB", from:"Ashen Towerworks",sc:"Remorseless"},
+
   {tower:"ToRH", from:"Ashen Towerworks",sc:"Remorseless"},
+
   {tower:"ToMD", from:"Ashen Towerworks",sc:"Remorseless"},
+
   {tower:"ToWF", from:"Ashen Towerworks",sc:"extreme"},
+
   {tower:"ToRB", from:"Ring 7",sc:"Difficult"},
+
   {tower:"ToCC", from:"Ring 7",sc:"Challenging"},
+
   {tower:"ToFL", from:"Ring 7",sc:"Challenging"},
+
   {tower:"ToDA", from:"Ring 7",sc:"Challenging"},
+
   {tower:"ToOOO", from:"Ring 7",sc:"Intense"},
+
   {tower:"ToNGUE", from:"Ring 7",sc:"Intense"},
+
   {tower:"ToNED", from:"Ring 7",sc:"Remorseless"},
+
   {tower:"ToU", from:"Ring 7",sc:"Remorseless"},
+
   {tower:"CoTE", from:"Ring 7",sc:"Remorseless"},
+
   {tower:"ToYV", from:"Ring 7",sc:"Remorseless"},
+
   {tower:"ToEH", from:"Ring 7",sc:"insane"},
+
   {tower:"ToTB", from:"Ring 7",sc:"teriffying"},
+
   {tower:"ToER", from:"Ring 7",sc:"catastrophic"},
+
   {tower:"FFaST", from:"Ring 7",sc:"Difficult"},
+
   {tower:"ToSSS", from:"Ring 8",sc:"Medium"},
+
   {tower:"ToNBA", from:"Ring 8",sc:"Hard"},
+
   {tower:"ToVF", from:"Ring 8",sc:"Challenging"},
+
   {tower:"ToVA", from:"Ring 8",sc:"Challenging"},
+
   {tower:"ToAA", from:"Ring 8",sc:"Challenging"},
+
   {tower:"CoCHS", from:"Ring 8",sc:"insane"},
+
   {tower:"ToUS", from:"Ring 8",sc:"insane"},
+
   {tower:"ToIII", from:"Ring 8",sc:"insane"},
+
   {tower:"ToVE", from:"Ring 8",sc:"Remorseless"},
+
   {tower:"ToMT", from:"Ring 8",sc:"Remorseless"},
+
   {tower:"ToSO", from:"Ring 8",sc:"extreme"},
+
   {tower:"ToEI", from:"Ring 8",sc:"extreme"},
+
   {tower:"ToGF", from:"Ring 8",sc:"catastrophic"},
+
   {tower:"ToLR", from:"The Starlit Archives",sc:"Difficult"},
+
   {tower:"ToYLFW", from:"The Starlit Archives",sc:"Difficult"},
+
   {tower:"ToPLA", from:"The Starlit Archives",sc:"Difficult"},
+
   {tower:"SoALD", from:"The Starlit Archives",sc:"Challenging"},
+
   {tower:"SoBC", from:"The Starlit Archives",sc:"Challenging"},
+
   {tower:"SoTMN", from:"The Starlit Archives",sc:"Challenging"},
+
   {tower:"SoTMM", from:"The Starlit Archives",sc:"Challenging"},
+
   {tower:"ToTUTU", from:"The Starlit Archives",sc:"Intense"},
+
   {tower:"ToIR", from:"The Starlit Archives",sc:"Intense"},
+
   {tower:"SoIB", from:"The Starlit Archives",sc:"Intense"},
+
   {tower:"ToADE", from:"The Starlit Archives",sc:"Intense"},
+
   {tower:"ToWR", from:"The Starlit Archives",sc:"Intense"},
+
   {tower:"ToFFEE", from:"The Starlit Archives",sc:"Remorseless"},
+
   {tower:"ToHWH", from:"The Starlit Archives",sc:"Remorseless"},
+
   {tower:"SoFB", from:"The Starlit Archives",sc:"Remorseless"},
+
   {tower:"SoCV", from:"The Starlit Archives",sc:"Remorseless"},
+
   {tower:"ToGO", from:"Ring 9",sc:"Intense"},
+
   {tower:"ToBBB", from:"Ring 9",sc:"Remorseless"},
+
   {tower:"ToQT", from:"Ring 9",sc:"Remorseless"},
+
   {tower:"CoL", from:"Ring 9",sc:"Remorseless"},
+
   {tower:"ToPP", from:"Ring 9",sc:"Remorseless"},
+
   {tower:"ToHA", from:"Ring 9",sc:"insane"},
+
   {tower:"ToBT", from:"Ring 9",sc:"insane"},
+
   {tower:"ToCA", from:"Ring 9",sc:"insane"},
+
   {tower:"ToFaCT", from:"Ring 9",sc:"extreme"},
+
   {tower:"ToBK", from:"Ring 9",sc:"extreme"},
+
   {tower:"ToJE", from:"Ring 9",sc:"teriffying"},
+
   {tower:"ToNS", from:"Ring 9",sc:"teriffying"},
+
   {tower:"ToAM", from:"Ring 9",sc:"catastrophic"},
+
   {tower:"ToCR", from:"Ring 9",sc:"catastrophic"},
+
   {tower:"ToCP", from:"Ring 9",sc:"catastrophic"},
+
   {tower:"ToZD", from:"Zone 1",sc:"Easy"},
+
   {tower:"ToPHaT", from:"Zone 1",sc:"Easy"},
+
   {tower:"ToAD", from:"Zone 1",sc:"Medium"},
+
   {tower:"ToP", from:"Zone 1",sc:"Hard"},
+
   {tower:"ToHS", from:"Zone 1",sc:"Hard"},
+
   {tower:"ToMH", from:"Zone 1",sc:"Hard"},
+
   {tower:"ToCO", from:"Zone 1",sc:"Difficult"},
+
   {tower:"ToYS", from:"Zone 1",sc:"Difficult"},
+
   {tower:"ToAV", from:"Zone 1",sc:"Challenging"},
+
   {tower:"ToWEL", from:"Zone 1",sc:"Challenging"},
+
   {tower:"ToUT", from:"Zone 1",sc:"Intense"},
+
   {tower:"ToED", from:"Zone 1",sc:"Remorseless"},
+
   {tower:"ToRNI", from:"Zone 1",sc:"Remorseless"},
+
   {tower:"CoP", from:"Zone 1",sc:"Remorseless"},
+
   {tower:"ToZ", from:"Zone 1",sc:"Remorseless"},
+
   {tower:"ToTL", from:"Zone 1",sc:"insane"},
+
   {tower:"SaT", from:"Zone 1",sc:"Challenging"},
+
   {tower:"SoZZP", from:"Steelspire Horizon",sc:"Easy"},
+
   {tower:"SoGC", from:"Steelspire Horizon",sc:"Easy"},
+
   {tower:"ToSL", from:"Steelspire Horizon",sc:"Medium"},
+
   {tower:"ToQR", from:"Steelspire Horizon",sc:"Medium"},
+
   {tower:"ToSaT", from:"Steelspire Horizon",sc:"Medium"},
+
   {tower:"ToFH", from:"Steelspire Horizon",sc:"Hard"},
+
   {tower:"ToCBTS", from:"Steelspire Horizon",sc:"Hard"},
+
   {tower:"ToTFC", from:"Steelspire Horizon",sc:"Hard"},
+
   {tower:"SoBCM", from:"Steelspire Horizon",sc:"Difficult"},
+
   {tower:"SoDR", from:"Steelspire Horizon",sc:"Challenging"},
+
   {tower:"ToWE", from:"Steelspire Horizon",sc:"Challenging"},
+
   {tower:"SoSK", from:"Steelspire Horizon",sc:"Challenging"},
+
   {tower:"ToFP", from:"Steelspire Horizon",sc:"Intense"},
+
   {tower:"ToNoS", from:"Steelspire Horizon",sc:"Intense"},
+
   {tower:"CoT", from:"Steelspire Horizon",sc:"Intense"},
+
   {tower:"ToGK", from:"Steelspire Horizon",sc:"Remorseless"},
+
   {tower:"ToSRT", from:"Steelspire Horizon",sc:"insane"},
+
   {tower:"ToVR", from:"Zone 2",sc:"Medium"},
+
   {tower:"ToSA", from:"Zone 2",sc:"Medium"},
+
   {tower:"ToGLA", from:"Zone 2",sc:"Hard"},
+
   {tower:"ToTA", from:"Zone 2",sc:"Difficult"},
+
   {tower:"ToUD", from:"Zone 2",sc:"Difficult"},
+
   {tower:"ToDaC", from:"Zone 2",sc:"Difficult"},
+
   {tower:"ToPF", from:"Zone 2",sc:"Challenging"},
+
   {tower:"ToSaS", from:"Zone 2",sc:"Challenging"},
+
   {tower:"CoGS", from:"Zone 2",sc:"Intense"},
+
   {tower:"ToEE", from:"Zone 2",sc:"Intense"},
+
   {tower:"ToAZ", from:"Zone 2",sc:"Intense"},
+
   {tower:"ToTT", from:"Zone 2",sc:"Intense"},
+
   {tower:"ToGD", from:"Zone 2",sc:"Remorseless"},
+
   {tower:"ToCM", from:"Zone 2",sc:"Remorseless"},
+
   {tower:"ToDT", from:"Zone 2",sc:"insane"},
+
   {tower:"SoBT", from:"Arcane Area",sc:"Medium"},
+
   {tower:"SoAS", from:"Arcane Area",sc:"Medium"},
+
   {tower:"SoAP", from:"Arcane Area",sc:"Hard"},
+
   {tower:"SoRO", from:"Arcane Area",sc:"Hard"},
+
   {tower:"SoTC", from:"Arcane Area",sc:"Difficult"},
+
   {tower:"SoME", from:"Arcane Area",sc:"Difficult"},
+
   {tower:"SoCA", from:"Arcane Area",sc:"Challenging"},
+
   {tower:"SoWC", from:"Arcane Area",sc:"Challenging"},
+
   {tower:"SoMC", from:"Arcane Area",sc:"Intense"},
+
   {tower:"ToIA", from:"Arcane Area",sc:"Remorseless"},
+
   {tower:"ToSFU", from:"Zone 3",sc:"Easy"},
+
   {tower:"ToOD", from:"Zone 3",sc:"Easy"},
+
   {tower:"ToBB", from:"Zone 3",sc:"Medium"},
+
   {tower:"ToCOF", from:"Zone 3",sc:"Medium"},
+
   {tower:"ToCCC", from:"Zone 3",sc:"Hard"},
+
   {tower:"ToX", from:"Zone 3",sc:"Hard"},
+
   {tower:"ToDH", from:"Zone 3",sc:"Difficult"},
+
   {tower:"ToMA", from:"Zone 3",sc:"Difficult"},
+
   {tower:"ToCaS", from:"Zone 3",sc:"Difficult"},
+
   {tower:"ToRCH", from:"Zone 3",sc:"Difficult"},
+
   {tower:"CoTS", from:"Zone 3",sc:"Difficult"},
+
   {tower:"ToMC", from:"Zone 3",sc:"Challenging"},
+
   {tower:"ToQC", from:"Zone 3",sc:"Intense"},
+
   {tower:"ToIO", from:"Zone 3",sc:"Intense"},
+
   {tower:"ToCaUP", from:"Zone 3",sc:"Intense"},
+
   {tower:"ToHH", from:"Zone 3",sc:"extreme"},
+
   {tower:"SoMM", from:"Paradise Atoll",sc:"Easy"},
+
   {tower:"SoUV", from:"Paradise Atoll",sc:"Medium"},
+
   {tower:"SoW", from:"Paradise Atoll",sc:"Hard"},
+
   {tower:"ToCIAD", from:"Paradise Atoll",sc:"Hard"},
+
   {tower:"SoAU", from:"Paradise Atoll",sc:"Hard"},
+
   {tower:"SoSIS", from:"Paradise Atoll",sc:"Difficult"},
+
   {tower:"SoAR", from:"Paradise Atoll",sc:"Difficult"},
+
   {tower:"ToHP", from:"Paradise Atoll",sc:"Difficult"},
+
   {tower:"SoHS", from:"Paradise Atoll",sc:"Difficult"},
+
   {tower:"SoDI", from:"Paradise Atoll",sc:"Challenging"},
+
   {tower:"ToCI", from:"Paradise Atoll",sc:"Challenging"},
+
   {tower:"SoUC", from:"Paradise Atoll",sc:"Challenging"},
+
   {tower:"SoCF", from:"Paradise Atoll",sc:"Challenging"},
+
   {tower:"ToTTT", from:"Paradise Atoll",sc:"Intense"},
+
   {tower:"SoDD", from:"Paradise Atoll",sc:"Intense"},
+
   {tower:"SoUB", from:"Paradise Atoll",sc:"Intense"},
+
   {tower:"ToFSC", from:"Zone 4",sc:"Easy"},
+
   {tower:"ToAC", from:"Zone 4",sc:"Medium"},
+
   {tower:"ToFaST", from:"Zone 4",sc:"Hard"},
+
   {tower:"ToUID", from:"Zone 4",sc:"Hard"},
+
   {tower:"ToET", from:"Zone 4",sc:"Difficult"},
+
   {tower:"ToWW", from:"Zone 4",sc:"Difficult"},
+
   {tower:"ToPC", from:"Zone 4",sc:"Challenging"},
+
   {tower:"ToMIM", from:"Zone 4",sc:"Intense"},
+
   {tower:"ToSS", from:"Zone 4",sc:"Intense"},
+
   {tower:"ToDDD", from:"Zone 4",sc:"Remorseless"},
+
   {tower:"ToFG", from:"Zone 4",sc:"Remorseless"},
+
   {tower:"CoQ", from:"Zone 4",sc:"Remorseless"},
+
   {tower:"ToTV", from:"Zone 4",sc:"Remorseless"},
+
   {tower:"ToIF", from:"Zone 4",sc:"insane"},
+
   {tower:"ToAAA", from:"Zone 4",sc:"extreme"},
+
   {tower:"ToST", from:"Zone 5",sc:"Hard"},
+
   {tower:"ToSSSS", from:"Zone 5",sc:"Hard"},
+
   {tower:"ToFV", from:"Zone 5",sc:"Difficult"},
+
   {tower:"ToBS", from:"Zone 5",sc:"Difficult"},
+
   {tower:"ToSTS", from:"Zone 5",sc:"Challenging"},
+
   {tower:"ToUE", from:"Zone 5",sc:"Challenging"},
+
   {tower:"ToHK", from:"Zone 5",sc:"Intense"},
+
   {tower:"ToHE", from:"Zone 5",sc:"Intense"},
+
   {tower:"ToGT", from:"Zone 5",sc:"Intense"},
+
   {tower:"CoCE", from:"Zone 5",sc:"Intense"},
+
   {tower:"ToAO", from:"Zone 5",sc:"Intense"},
+
   {tower:"ToBaBT", from:"Zone 5",sc:"Remorseless"},
+
   {tower:"ToZA", from:"Zone 5",sc:"Remorseless"},
+
   {tower:"ToPZ", from:"Zone 5",sc:"insane"},
+
   {tower:"ToAR", from:"Zone 5",sc:"teriffying"},
+
   {tower:"ToFD", from:"Zone 6",sc:"Hard"},
+
   {tower:"ToRC", from:"Zone 6",sc:"Difficult"},
+
   {tower:"ToCF", from:"Zone 6",sc:"Challenging"},
+
   {tower:"ToBIBI", from:"Zone 6",sc:"Challenging"},
+
   {tower:"ToAS", from:"Zone 6",sc:"Challenging"},
+
   {tower:"ToHM", from:"Zone 6",sc:"Challenging"},
+
   {tower:"CoTaW", from:"Zone 6",sc:"Intense"},
+
   {tower:"ToHL", from:"Zone 6",sc:"Intense"},
+
   {tower:"ToW", from:"Zone 6",sc:"Intense"},
+
   {tower:"ToAF", from:"Zone 6",sc:"Remorseless"},
+
   {tower:"ToMO", from:"Zone 6",sc:"Remorseless"},
+
   {tower:"ToBC", from:"Zone 6",sc:"Remorseless"},
+
   {tower:"ToTDA", from:"Zone 6",sc:"extreme"},
+
   {tower:"ToMM", from:"Zone 6",sc:"teriffying"},
+
   {tower:"ToJ", from:"Zone 7",sc:"Medium"},
+
   {tower:"ToRW", from:"Zone 7",sc:"Hard"},
+
   {tower:"ToSV", from:"Zone 7",sc:"Hard"},
+
   {tower:"ToBR", from:"Zone 7",sc:"Difficult"},
+
   {tower:"ToDF", from:"Zone 7",sc:"Difficult"},
+
   {tower:"ToGM", from:"Zone 7",sc:"Challenging"},
+
   {tower:"ToCE", from:"Zone 7",sc:"Challenging"},
+
   {tower:"ToWS", from:"Zone 7",sc:"Challenging"},
+
   {tower:"ToY", from:"Zone 7",sc:"Intense"},
+
   {tower:"ToCMC", from:"Zone 7",sc:"Intense"},
+
   {tower:"ToSaPS", from:"Zone 7",sc:"Intense"},
+
   {tower:"ToUI", from:"Zone 7",sc:"Remorseless"},
+
   {tower:"CoACT", from:"Zone 7",sc:"Remorseless"},
+
   {tower:"ToFM", from:"Zone 7",sc:"teriffying"},
+
   {tower:"ToUA", from:"Zone 7",sc:"teriffying"},
+
   {tower:"ToMIT", from:"Zone 8",sc:"Hard"},
+
   {tower:"ToCT", from:"Zone 8",sc:"Hard"},
+
   {tower:"ToATD", from:"Zone 8",sc:"Difficult"},
+
   {tower:"ToXM", from:"Zone 8",sc:"Difficult"},
+
   {tower:"ToGV", from:"Zone 8",sc:"Challenging"},
+
   {tower:"ToFR", from:"Zone 8",sc:"Challenging"},
+
   {tower:"ToON", from:"Zone 8",sc:"Intense"},
+
   {tower:"ToNEF", from:"Zone 8",sc:"Intense"},
+
   {tower:"ToML", from:"Zone 8",sc:"Intense"},
+
   {tower:"ToOV", from:"Zone 8",sc:"Remorseless"},
+
   {tower:"CoPE", from:"Zone 8",sc:"Remorseless"},
+
   {tower:"ToTaSM", from:"Zone 8",sc:"Remorseless"},
+
   {tower:"ToNR", from:"Zone 8",sc:"Remorseless"},
+
   {tower:"ToRER", from:"Zone 8",sc:"insane"},
+
   {tower:"ToAE", from:"Zone 8",sc:"extreme"},
+
   {tower:"ToDIE", from:"Zone 8",sc:"catastrophic"},
+
   {tower:"ToABCD", from:"Zone 9",sc:"Difficult"},
+
   {tower:"ToDTD", from:"Zone 9",sc:"Challenging"},
+
   {tower:"ToLS", from:"Zone 9",sc:"Challenging"},
+
   {tower:"ToBL", from:"Zone 9",sc:"Challenging"},
+
   {tower:"ToSRD", from:"Zone 9",sc:"Intense"},
+
   {tower:"ToNN", from:"Zone 9",sc:"Intense"},
+
   {tower:"ToFCB", from:"Zone 9",sc:"Intense"},
+
   {tower:"ToFU", from:"Zone 9",sc:"Intense"},
+
   {tower:"ToEC", from:"Zone 9",sc:"Remorseless"},
+
   {tower:"ToBBBB", from:"Zone 9",sc:"Remorseless"},
+
   {tower:"ToMF", from:"Zone 9",sc:"Remorseless"},
+
   {tower:"CoIS", from:"Zone 9",sc:"Remorseless"},
+
   {tower:"ToVITE", from:"Zone 9",sc:"Remorseless"},
+
   {tower:"ToHR", from:"Zone 9",sc:"insane"},
+
   {tower:"ToPB", from:"Zone 9",sc:"extreme"},
+
   {tower:"ToWWW", from:"Zone 9",sc:"teriffying"},
+
   {tower:"ToEMP", from:"Zone 9",sc:"catastrophic"},
+
   {tower:"ToCZ", from:"Zone 10",sc:"Challenging"},
+
   {tower:"ToRL", from:"Zone 10",sc:"Challenging"},
+
   {tower:"ToIT", from:"Zone 10",sc:"Challenging"},
+
   {tower:"ToVV", from:"Zone 10",sc:"Challenging"},
+
   {tower:"ToETU", from:"Zone 10",sc:"Intense"},
+
   {tower:"ToMN", from:"Zone 10",sc:"Intense"},
+
   {tower:"ToOTTF", from:"Zone 10",sc:"Remorseless"},
+
   {tower:"ToTDF", from:"Zone 10",sc:"Remorseless"},
+
   {tower:"ToPI", from:"Zone 10",sc:"Remorseless"},
+
   {tower:"ToPL", from:"Zone 10",sc:"Remorseless"},
+
   {tower:"CoOTWI", from:"Zone 10",sc:"Remorseless"},
+
   {tower:"ToRoMW", from:"Zone 10",sc:"insane"},
+
   {tower:"ToTHT", from:"Zone 10",sc:"insane"},
+
   {tower:"ToBP", from:"Zone 10",sc:"extreme"},
+
   {tower:"ToCaV", from:"Zone 10",sc:"teriffying"},
+
   {tower:"ToRT", from:"Zone 10",sc:"catastrophic"},
+
   {tower:"ToNF", from:"The Eternal Abyss",sc:"Easy"},
+
   {tower:"TTTT", from:"The Eternal Abyss",sc:"insane"},
+
   {tower:"ToDN", from:"The Eternal Abyss",sc:"insane"},
+
   {tower:"ToIHR", from:"The Eternal Abyss",sc:"extreme"},
+
   {tower:"ToEtA", from:"The Eternal Abyss",sc:"extreme"},
+
   {tower:"SoPC", from:"The Eternal Abyss",sc:"teriffying"},
+
   {tower:"ToQQ", from:"The Eternal Abyss",sc:"teriffying"},
+
   {tower:"ToUP", from:"The Eternal Abyss",sc:"teriffying"},
+
   {tower:"ToVD", from:"The Eternal Abyss",sc:"teriffying"},
+
   {tower:"ToCL", from:"The Eternal Abyss",sc:"catastrophic"},
+
   {tower:"ToMEN", from:"The Eternal Abyss",sc:"catastrophic"},
+
   {tower:"ToTo", from:"The Eternal Abyss",sc:"catastrophic"},
+
   {tower:"ToOT", from:"The Eternal Abyss",sc:"catastrophic"},
+
   {tower:"ToMMM", from:"The Eternal Abyss",sc:"catastrophic"},
+
   {tower:"BEAT", from:"The Eternal Abyss",sc:"catastrophic"},
+
   {tower:"ToHG", from:"The Eternal Abyss",sc:"catastrophic"},
+
   {tower:"ToTW", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToMN", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"SoNB", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToTSTL", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToPR", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToFA", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToQD", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToLL", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToSR", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToUM", from:"The Eternal Abyss",sc:"horrific"},
+
   {tower:"ToQU", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToZS", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"CoTEC", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"CoCBF", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToMIH", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToW", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToID", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToMH", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"STONE", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToF", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToINE", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToTCR", from:"The Eternal Abyss",sc:"Unreal"},
+
   {tower:"ToMDC", from:"Pit Of Misery",sc:"Easy"},
+
   {tower:"ToCP", from:"Pit Of Misery",sc:"insane"},
+
   {tower:"ToPI", from:"Pit Of Misery",sc:"insane"},
+
   {tower:"ToSUT", from:"Pit Of Misery",sc:"insane"},
+
   {tower:"ToRUS", from:"Pit Of Misery",sc:"extreme"},
+
   {tower:"ToUA", from:"Pit Of Misery",sc:"extreme"},
+
   {tower:"ToXIC", from:"Pit Of Misery",sc:"teriffying"},
+
   {tower:"ToRRR", from:"Pit Of Misery",sc:"teriffying"},
+
   {tower:"ToSA", from:"Pit Of Misery",sc:"teriffying"},
+
   {tower:"ToCUP", from:"Pit Of Misery",sc:"teriffying"},
+
   {tower:"ToATC", from:"Pit Of Misery",sc:"teriffying"},
+
   {tower:"STONE_V", from:"Pit Of Misery",sc:"teriffying"},
+
   {tower:"ToVM", from:"Pit Of Misery",sc:"teriffying"},
+
   {tower:"ToLJ", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToG", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToOLC", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToGF", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"WAT", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToMM", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToPC", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToQ", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToTP", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToCR", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToVH", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToSE", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToER", from:"Pit Of Misery",sc:"catastrophic"},
+
   {tower:"ToJJ", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToTH", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"SoCB", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToFP", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToCE", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToLP", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToWM", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToTRP", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToVL", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToTF", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToEV", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"UT", from:"Pit Of Misery",sc:"horrific"},
+
   {tower:"ToSD", from:"Pit Of Misery",sc:"Unreal"},
+
   {tower:"ToP", from:"Pit Of Misery",sc:"Unreal"},
+
   {tower:"ToBF", from:"Pit Of Misery",sc:"Unreal"},
+
   {tower:"CoIV", from:"Pit Of Misery",sc:"Unreal"},
+
   {tower:"ToSF", from:"Pit Of Misery",sc:"Unreal"},
+
   {tower:"ToOEZ", from:"Timeless Manor",sc:"Easy"},
+
   {tower:"ToDC", from:"Timeless Manor",sc:"insane"},
+
   {tower:"ToSW", from:"Timeless Manor",sc:"insane"},
+
   {tower:"ToFR", from:"Timeless Manor",sc:"insane"},
+
   {tower:"ToFL", from:"Timeless Manor",sc:"insane"},
+
   {tower:"ToAD", from:"Timeless Manor",sc:"insane"},
+
   {tower:"ToBD", from:"Timeless Manor",sc:"insane"},
+
   {tower:"ToTC", from:"Timeless Manor",sc:"insane"},
+
   {tower:"SoED", from:"Timeless Manor",sc:"extreme"},
+
   {tower:"ToQTP", from:"Timeless Manor",sc:"extreme"},
+
   {tower:"ToPT", from:"Timeless Manor",sc:"extreme"},
+
   {tower:"ToRD", from:"Timeless Manor",sc:"extreme"},
+
   {tower:"ToTDD", from:"Timeless Manor",sc:"extreme"},
+
   {tower:"ToUC", from:"Timeless Manor",sc:"extreme"},
+
   {tower:"BOAT", from:"Timeless Manor",sc:"extreme"},
+
   {tower:"ToED", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"ToEA", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"ToO", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"ToFE", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"ToEO", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"UTT", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"ToHaHA", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"KS", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"ToPA", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"ToHN", from:"Timeless Manor",sc:"teriffying"},
+
   {tower:"CoLDC", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"ToFI", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"ToRRA", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"ToOE", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"STONE_C", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"ToC", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"ToCOA", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"SoPPP", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"ToMB", from:"Timeless Manor",sc:"catastrophic"},
+
   {tower:"ToTB", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"ToFB", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"DT", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"ToBE", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"ToDD", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"SoD", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"SS", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"ToDF", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"ToSQ", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"ToIG", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"ToTT", from:"Timeless Manor",sc:"horrific"},
+
   {tower:"GCoGDC", from:"Timeless Manor",sc:"Unreal"},
+
   {tower:"ToTQFP", from:"Timeless Manor",sc:"Unreal"},
+
   {tower:"ToIZ", from:"Timeless Manor",sc:"Unreal"},
+
   {tower:"SoEA", from:"Starry Night",sc:"insane"},
+
   {tower:"ToRM", from:"Starry Night",sc:"insane"},
+
   {tower:"ToKIT", from:"Starry Night",sc:"insane"},
+
   {tower:"ToTV", from:"Starry Night",sc:"insane"},
+
   {tower:"ToSYS", from:"Starry Night",sc:"insane"},
+
   {tower:"SoGB", from:"Starry Night",sc:"extreme"},
+
   {tower:"ToBM", from:"Starry Night",sc:"extreme"},
+
   {tower:"ToD", from:"Starry Night",sc:"extreme"},
+
   {tower:"ToCA", from:"Starry Night",sc:"extreme"},
+
   {tower:"TETO", from:"Starry Night",sc:"extreme"},
+
   {tower:"ToPH", from:"Starry Night",sc:"extreme"},
+
   {tower:"ToAT", from:"Starry Night",sc:"extreme"},
+
   {tower:"ToK", from:"Starry Night",sc:"teriffying"},
+
   {tower:"ToQI", from:"Starry Night",sc:"teriffying"},
+
   {tower:"ToUL", from:"Starry Night",sc:"teriffying"},
+
   {tower:"ToTR", from:"Starry Night",sc:"teriffying"},
+
   {tower:"ToCD", from:"Starry Night",sc:"teriffying"},
+
   {tower:"ToHC", from:"Starry Night",sc:"teriffying"},
+
   {tower:"CoW", from:"Starry Night",sc:"teriffying"},
+
   {tower:"ToCV", from:"Starry Night",sc:"teriffying"},
+
   {tower:"ToIX", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToCCC", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToSPRL", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToIR", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToRRRR", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToRE", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToTM", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToM", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"SoQC", from:"Starry Night",sc:"catastrophic"},
+
   {tower:"ToLR", from:"Starry Night",sc:"horrific"},
+
   {tower:"ToFC", from:"Time-Lost Plain",sc:"Easy"},
+
   {tower:"ToCS", from:"Time-Lost Plain",sc:"Easy"},
+
   {tower:"ToG", from:"Time-Lost Plain",sc:"Medium"},
+
   {tower:"SoQ", from:"Time-Lost Plain",sc:"Medium"},
+
   {tower:"ToOE", from:"Time-Lost Plain",sc:"Medium"},
+
   {tower:"ToPO", from:"Time-Lost Plain",sc:"Medium"},
+
   {tower:"SoAE", from:"Time-Lost Plain",sc:"Medium"},
+
   {tower:"ToPV", from:"Time-Lost Plain",sc:"Medium"},
+
   {tower:"ToMR", from:"Time-Lost Plain",sc:"Hard"},
+
   {tower:"ToMI", from:"Time-Lost Plain",sc:"Hard"},
+
   {tower:"ToSF", from:"Time-Lost Plain",sc:"Hard"},
+
   {tower:"ToOSE", from:"Time-Lost Plain",sc:"Hard"},
+
   {tower:"ToSG", from:"Time-Lost Plain",sc:"Difficult"},
+
   {tower:"ToVR", from:"Time-Lost Plain",sc:"Difficult"},
+
   {tower:"CoMaV", from:"Time-Lost Plain",sc:"Difficult"},
+
   {tower:"SoNE", from:"Time-Lost Plain",sc:"Challenging"},
+
   {tower:"ToASH", from:"Time-Lost Plain",sc:"Challenging"},
+
   {tower:"ITAT", from:"Time-Lost Plain",sc:"Challenging"},
+
   {tower:"ToSBC", from:"Time-Lost Plain",sc:"Intense"},
+
   {tower:"ToUGH", from:"Time-Lost Plain",sc:"Intense"},
+
   {tower:"ToDW", from:"Time-Lost Plain",sc:"Intense"},
+
   {tower:"ToCD", from:"Time-Lost Plain",sc:"Intense"},
+
   {tower:"ToTEP", from:"Time-Lost Plain",sc:"Intense"},
+
   {tower:"ToAP", from:"Time-Lost Plain",sc:"Remorseless"},
+
   {tower:"ToPT", from:"Time-Lost Clockwork",sc:"Easy"},
+
   {tower:"ToND", from:"Time-Lost Clockwork",sc:"Medium"},
+
   {tower:"ToIV", from:"Time-Lost Clockwork",sc:"Medium"},
+
   {tower:"ToMD", from:"Time-Lost Clockwork",sc:"Hard"},
+
   {tower:"SoJT", from:"Time-Lost Clockwork",sc:"Hard"},
+
   {tower:"ToNH", from:"Time-Lost Clockwork",sc:"Difficult"},
+
   {tower:"ToNA", from:"Time-Lost Clockwork",sc:"Difficult"},
+
   {tower:"SoPN", from:"Time-Lost Clockwork",sc:"Difficult"},
+
   {tower:"ToWP", from:"Time-Lost Clockwork",sc:"Difficult"},
+
   {tower:"ToCCQ", from:"Time-Lost Clockwork",sc:"Difficult"},
+
   {tower:"ToFaNS", from:"Time-Lost Clockwork",sc:"Difficult"},
+
   {tower:"ToMS", from:"Time-Lost Clockwork",sc:"Challenging"},
+
   {tower:"ToAaD", from:"Time-Lost Clockwork",sc:"Challenging"},
+
   {tower:"ToFM", from:"Time-Lost Clockwork",sc:"Challenging"},
+
   {tower:"M-TiAT", from:"Time-Lost Clockwork",sc:"Intense"},
+
   {tower:"ToOT", from:"Time-Lost Clockwork",sc:"Intense"},
+
   {tower:"ToVS", from:"Time-Lost Clockwork",sc:"Intense"},
+
   {tower:"ToFA", from:"Time-Lost Clockwork",sc:"Intense"},
+
   {tower:"ToFHF", from:"Time-Lost Clockwork",sc:"Remorseless"},
+
   {tower:"ToSET", from:"Time-Lost Clockwork",sc:"Remorseless"},
+
   {tower:"ToFCD", from:"Time-Lost Clockwork",sc:"Remorseless"},
+
   {tower:"ToISCR", from:"Time-Lost Clockwork",sc:"Remorseless"},
+
   {tower:"ToSTR", from:"Time-Lost Clockwork",sc:"insane"},
+
   {tower:"ToSIO", from:"Time-Lost Clockwork",sc:"Gingerbread"},
+
   {tower:"ToPaG", from:"Time-Lost Clockwork",sc:"Gingerbread"},
+
   {tower:"ToLH", from:"Time-Lost Sands",sc:"Easy"},
+
   {tower:"ToLF", from:"Time-Lost Sands",sc:"Easy"},
+
   {tower:"ToVSD", from:"Time-Lost Sands",sc:"Medium"},
+
   {tower:"ToOA", from:"Time-Lost Sands",sc:"Medium"},
+
   {tower:"ToSN", from:"Time-Lost Sands",sc:"Medium"},
+
   {tower:"ToCoTS", from:"Time-Lost Sands",sc:"Medium"},
+
   {tower:"SoOP", from:"Time-Lost Sands",sc:"Hard"},
+
   {tower:"ToSCP", from:"Time-Lost Sands",sc:"Hard"},
+
   {tower:"SoGH", from:"Time-Lost Sands",sc:"Hard"},
+
   {tower:"ToCE", from:"Time-Lost Sands",sc:"Difficult"},
+
   {tower:"ToPD", from:"Time-Lost Sands",sc:"Difficult"},
+
   {tower:"ToBA", from:"Time-Lost Sands",sc:"Difficult"},
+
   {tower:"ToIT", from:"Time-Lost Sands",sc:"Challenging"},
+
   {tower:"ToFW", from:"Time-Lost Sands",sc:"Challenging"},
+
   {tower:"ToPW", from:"Time-Lost Sands",sc:"Challenging"},
+
   {tower:"SoTDW", from:"Time-Lost Sands",sc:"Intense"},
+
   {tower:"ToSB", from:"Time-Lost Sands",sc:"Intense"},
+
   {tower:"ToNM", from:"Time-Lost Sands",sc:"Intense"},
+
   {tower:"ToFU", from:"Time-Lost Sands",sc:"Intense"},
+
   {tower:"ToSTP", from:"Time-Lost Sands",sc:"Intense"},
+
   {tower:"CoSW", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"ToGD", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"ToNE", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"WIAT", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"ToKR", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"ToLE", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"ToTME", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"ToDI", from:"Time-Lost Sands",sc:"Remorseless"},
+
   {tower:"ToQA", from:"Time-Lost Sands",sc:"insane"},
+
   {tower:"SoE", from:"Time-Lost Tempest",sc:"Medium"},
+
   {tower:"SoVIV", from:"Time-Lost Tempest",sc:"Hard"},
+
   {tower:"ToJE", from:"Time-Lost Tempest",sc:"Hard"},
+
   {tower:"ToAE", from:"Time-Lost Tempest",sc:"Hard"},
+
   {tower:"ToEEE", from:"Time-Lost Tempest",sc:"Hard"},
+
   {tower:"ToAIR", from:"Time-Lost Tempest",sc:"Difficult"},
+
   {tower:"ToRW", from:"Time-Lost Tempest",sc:"Difficult"},
+
   {tower:"ToVH", from:"Time-Lost Tempest",sc:"Difficult"},
+
   {tower:"ToID", from:"Time-Lost Tempest",sc:"Difficult"},
+
   {tower:"SoBLC", from:"Time-Lost Tempest",sc:"Challenging"},
+
   {tower:"ToHD", from:"Time-Lost Tempest",sc:"Challenging"},
+
   {tower:"ToVP", from:"Time-Lost Tempest",sc:"Challenging"},
+
   {tower:"SoSC", from:"Time-Lost Tempest",sc:"Challenging"},
+
   {tower:"DDLLAT", from:"Time-Lost Tempest",sc:"Challenging"},
+
   {tower:"SoRT", from:"Time-Lost Tempest",sc:"Challenging"},
+
   {tower:"ToV", from:"Time-Lost Tempest",sc:"Intense"},
+
   {tower:"ToDIM", from:"Time-Lost Tempest",sc:"Intense"},
+
   {tower:"ToPE", from:"Time-Lost Tempest",sc:"Intense"},
+
   {tower:"ToGTI", from:"Time-Lost Tempest",sc:"Intense"},
+
   {tower:"CoM", from:"Time-Lost Tempest",sc:"Intense"},
+
   {tower:"ToCV", from:"Time-Lost Tempest",sc:"Intense"},
+
   {tower:"ToTaS", from:"Time-Lost Tempest",sc:"Intense"},
+
   {tower:"ToCL", from:"Time-Lost Tempest",sc:"Remorseless"},
+
   {tower:"ToICC", from:"Time-Lost Tempest",sc:"Remorseless"},
+
   {tower:"ToTFA", from:"Time-Lost Tempest",sc:"Remorseless"},
+
   {tower:"ToOW", from:"Time-Lost Tempest",sc:"Remorseless"},
+
   {tower:"ToQ", from:"Time-Lost Tempest",sc:"Remorseless"},
+
   {tower:"ToLM", from:"Time-Lost Tempest",sc:"Remorseless"},
+
   {tower:"ToBD", from:"Time-Lost Tempest",sc:"insane"},
+
   {tower:"ToCOA", from:"Time-Lost Tempest",sc:"catastrophic"},
+
   {tower:"SoCB", from:"PoM EToH",sc:"Gingerbread"},
+
   {tower:"ToMDC", from:"PoM EToH",sc:"Easy"},
+
   {tower:"ToXIC", from:"PoM EToH",sc:"teriffying"},
+
   {tower:"ToOLC", from:"PoM EToH",sc:"teriffying"},
+
   {tower:"ToVM", from:"PoM EToH",sc:"catastrophic"},
+
   {tower:"ToSE", from:"PoM EToH",sc:"catastrophic"},
+
   {tower:"ToVH", from:"PoM EToH",sc:"horrific"},
+
   {tower:"ToWM", from:"PoM EToH",sc:"horrific"},
+
   {tower:"ToTRP", from:"PoM EToH",sc:"horrific"},
+
   {tower:"ToEV", from:"PoM EToH",sc:"horrific"},
+
   {tower:"ToBF", from:"PoM EToH",sc:"Unreal"},
+
   {tower:"ToSF", from:"PoM EToH",sc:"Unreal"},
+
   {tower:"WAT", from:"PoM EToH",sc:"teriffying"},
+
   {tower:"CoIV", from:"PoM EToH",sc:"Unreal"},
+
   {tower:"ToT", from:"Legacy Fortress",sc:"Easy"},
+
   {tower:"ToPS", from:"Legacy Fortress",sc:"Medium"},
+
   {tower:"ToTE", from:"Legacy Fortress",sc:"Difficult"},
+
   {tower:"ToUP", from:"Legacy Fortress",sc:"Difficult"},
+
   {tower:"ToG", from:"Legacy Fortress",sc:"Difficult"},
+
   {tower:"ToWS", from:"Legacy Fortress",sc:"Challenging"},
+
   {tower:"ToTU", from:"Legacy Fortress",sc:"Intense"},
+
   {tower:"ToGI", from:"Legacy Fortress",sc:"Intense"},
+
   {tower:"ToMD", from:"Legacy Fortress",sc:"Remorseless"},
+
   {tower:"ToST", from:"Legacy Fortress",sc:"Remorseless"},
+
   {tower:"ToC", from:"Legacy Fortress",sc:"insane"},
+
   {tower:"ToUB", from:"Legacy Fortress",sc:"insane"},
+
   {tower:"ToAST", from:"Summit of Memories",sc:"Easy"},
+
   {tower:"ToA", from:"Summit of Memories",sc:"Easy"},
+
   {tower:"ToPHaT", from:"Summit of Memories",sc:"Easy"},
+
   {tower:"ToFT", from:"Summit of Memories",sc:"Easy"},
+
   {tower:"ToM", from:"Summit of Memories",sc:"Medium"},
+
   {tower:"SoAS", from:"Summit of Memories",sc:"Medium"},
+
   {tower:"SoAD", from:"Summit of Memories",sc:"Medium"},
+
   {tower:"ToAD", from:"Summit of Memories",sc:"Medium"},
+
   {tower:"ToDS", from:"Summit of Memories",sc:"Medium"},
+
   {tower:"ToCOF", from:"Summit of Memories",sc:"Medium"},
+
   {tower:"SoRO", from:"Summit of Memories",sc:"Hard"},
+
   {tower:"ToHS", from:"Summit of Memories",sc:"Hard"},
+
   {tower:"ToOH", from:"Summit of Memories",sc:"Hard"},
+
   {tower:"ToMH", from:"Summit of Memories",sc:"Hard"},
+
   {tower:"ToL", from:"Summit of Memories",sc:"Difficult"},
+
   {tower:"ToTM", from:"Summit of Memories",sc:"Difficult"},
+
   {tower:"ToLL", from:"Summit of Memories",sc:"Difficult"},
+
   {tower:"ToS", from:"Summit of Memories",sc:"Difficult"},
+
   {tower:"SoCA", from:"Summit of Memories",sc:"Challenging"},
+
   {tower:"ToR", from:"Summit of Memories",sc:"Challenging"},
+
   {tower:"ToT", from:"Summit of Memories",sc:"Challenging"},
+
   {tower:"ToAV", from:"Summit of Memories",sc:"Challenging"},
+
   {tower:"ITAT", from:"Summit of Memories",sc:"Challenging"},
+
   {tower:"SoWC", from:"Summit of Memories",sc:"Challenging"},
+
   {tower:"SoDD", from:"Summit of Memories",sc:"Intense"},
+
   {tower:"CoGS", from:"Summit of Memories",sc:"Intense"},
+
   {tower:"ToUT", from:"Summit of Memories",sc:"Intense"},
+
   {tower:"CoWN", from:"Summit of Memories",sc:"Intense"},
+
   {tower:"TT", from:"Summit of Memories",sc:"insane"},
+
   {tower:"ToDC", from:"Summit of Memories",sc:"insane"},
+
   {tower:"100MC", from:"Mini-events",sc:"Easy"},
+
   {tower:"100MT", from:"Mini-events",sc:"Easy"},
+
   {tower:"100MF", from:"Mini-events",sc:"Intense"},
+
   {tower:"100MR", from:"Mini-events",sc:"extreme"},
+
   {tower:"SoSJ", from:"Mini-events",sc:"Medium"},
+
   {tower:"SoCH", from:"Mini-events",sc:"Difficult"},
+
   {tower:"SoES", from:"Mini-events",sc:"Difficult"},
+
   {tower:"ToAH", from:"Mini-events",sc:"Challenging"},
+
   {tower:"SoGM", from:"Halloween Events",sc:"Easy"},
+
   {tower:"SoRC", from:"Halloween Events",sc:"Medium"},
+
   {tower:"SoHE", from:"Halloween Events",sc:"Medium"},
+
   {tower:"SoRMR", from:"Halloween Events",sc:"Hard"},
+
   {tower:"SoBV", from:"Halloween Events",sc:"Hard"},
+
   {tower:"SoFA", from:"Halloween Events",sc:"Hard"},
+
   {tower:"SoDC", from:"Halloween Events",sc:"Hard"},
+
   {tower:"ToWP", from:"Halloween Events",sc:"Hard"},
+
   {tower:"SoVD", from:"Halloween Events",sc:"Hard"},
+
   {tower:"SoRP", from:"Halloween Events",sc:"Difficult"},
+
   {tower:"SoTaT", from:"Halloween Events",sc:"Difficult"},
+
   {tower:"SoBB", from:"Halloween Events",sc:"Difficult"},
+
   {tower:"SoFoG", from:"Halloween Events",sc:"Difficult"},
+
   {tower:"SoHT", from:"Halloween Events",sc:"Challenging"},
+
   {tower:"SoMF", from:"Halloween Events",sc:"Challenging"},
+
   {tower:"SoMT", from:"Halloween Events",sc:"Intense"},
+
   {tower:"SoPP", from:"Halloween Events",sc:"Intense"},
+
   {tower:"SoCT", from:"Halloween Events",sc:"Intense"},
+
   {tower:"SoMH", from:"Halloween Events",sc:"Intense"},
+
   {tower:"WRATH", from:"Halloween Events",sc:"Intense"},
+
   {tower:"CoHP", from:"Halloween Events",sc:"Remorseless"},
+
   {tower:"SoTT", from:"Halloween Events",sc:"Remorseless"},
+
   {tower:"CoTaT", from:"Halloween Events",sc:"Remorseless"},
+
   {tower:"SoAG", from:"❄ Christmas Events",sc:"Medium"},
+
   {tower:"SoSE", from:"❄ Christmas Events",sc:"Medium"},
+
   {tower:"SoWO", from:"❄ Christmas Events",sc:"Medium"},
+
   {tower:"SoEA", from:"❄ Christmas Events",sc:"Hard"},
+
   {tower:"SoST", from:"❄ Christmas Events",sc:"Hard"},
+
   {tower:"SoCWG", from:"❄ Christmas Events",sc:"Hard"},
+
   {tower:"SoFT", from:"❄ Christmas Events",sc:"Difficult"},
+
   {tower:"SoFFI", from:"❄ Christmas Events",sc:"Difficult"},
+
   {tower:"SoWE", from:"❄ Christmas Events",sc:"Difficult"},
+
   {tower:"SoCMC", from:"❄ Christmas Events",sc:"Difficult"},
+
   {tower:"SoSA", from:"❄ Christmas Events",sc:"Difficult"},
+
   {tower:"ToMID", from:"❄ Christmas Events",sc:"Difficult"},
+
   {tower:"SoCC", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"SoJV", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"SoNBC", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"SoWS", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"ToHCF", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"CoFS", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"SoZC", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"SoSS", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"SoTCS", from:"❄ Christmas Events",sc:"Challenging"},
+
   {tower:"SoTBD", from:"❄ Christmas Events",sc:"Intense"},
+
   {tower:"SoPE", from:"❄ Christmas Events",sc:"Intense"},
+
   {tower:"SANTA", from:"❄ Christmas Events",sc:"Intense"},
+
   {tower:"SoBZ", from:"❄ Christmas Events",sc:"Remorseless"},
+
   {tower:"ToYM", from:"Fool's Ring 9",sc:"Medium"},
+
   {tower:"MSoGM", from:"Fool's Ring 9",sc:"Medium"},
+
   {tower:"ToRP", from:"Fool's Ring 9",sc:"Challenging"},
+
   {tower:"Toua", from:"Fool's Ring 9",sc:"Intense"},
+
   {tower:"BT", from:"Fool's Ring 9",sc:"insane"},
+
   {tower:"ToHG", from:"Fool's Ring 9",sc:"teriffying"},
+
   {tower:"ToDB", from:"Fool's Ring 9",sc:"teriffying"},
+
   {tower:"ToHQFB", from:"Terrain World",sc:"Hard"},
+
   {tower:"ToCRR", from:"Terrain World",sc:"Difficult"},
+
   {tower:"EFFF", from:"Terrain World",sc:"Difficult"},
+
   {tower:"G", from:"Terrain World",sc:"Challenging"},
+
   {tower:"ToCCE", from:"Terrain World",sc:"Remorseless"},
+
   {tower:"ToTCA", from:"Terrain World",sc:"insane"},
+
   {tower:"LLLL", from:"Something Otherwordly...",sc:"Medium"},
+
   {tower:"RT", from:"Something Otherwordly...",sc:"Hard"},
+
   {tower:"ToToToToT", from:"Something Otherwordly...",sc:"Difficult"},
+
   {tower:"CoABL", from:"Something Otherwordly...",sc:"Intense"},
+
   {tower:"ToDPW", from:"Something Otherwordly...",sc:"Remorseless"},
+
   {tower:"SoGLUBIC", from:"Something Otherwordly...",sc:"insane"},
+
   {tower:"''ToO''", from:"Something Otherwordly...",sc:"Gingerbread"},
+
   {tower:"ToGKD", from:"The Doghouse",sc:"Hard"},
+
   {tower:"EESHOL", from:"The Doghouse",sc:"Hard"},
+
   {tower:"ToGR", from:"The Doghouse",sc:"Difficult"},
+
   {tower:"DEA", from:"The Doghouse",sc:"Challenging"},
+
   {tower:"ToQBF", from:"The Doghouse",sc:"Intense"},
+
   {tower:"ToTCF", from:"The Doghouse",sc:"Intense"},
+
   {tower:"ToSRW", from:"The Doghouse",sc:"Remorseless"},
+
   {tower:"McoMC", from:"The Doghouse",sc:"insane"},
+
   {tower:"T1", from:"The Doghouse",sc:"extreme"},
+
   {tower:"MS", from:"BIOUMS",sc:"Difficult"},
+
   {tower:"ETTTT", from:"BIOUMS",sc:"Difficult"},
+
   {tower:"ToYSU", from:"BIOUMS",sc:"Challenging"},
+
   {tower:"ToVL", from:"BIOUMS",sc:"Challenging"},
+
   {tower:"ToNLU", from:"BIOUMS",sc:"Intense"},
+
   {tower:"TaN", from:"BIOUMS",sc:"Remorseless"},
+
   {tower:"ToBIGFALL", from:"BIOUMS",sc:"Remorseless"},
+
   {tower:"ToCRS", from:"BIOUMS",sc:"Remorseless"},
+
   {tower:"CT&HT", from:"BIOUMS",sc:"insane"},
+
   {tower:"ToRVAI", from:"BIOUMS",sc:"insane"},
+
   {tower:"MOoMO", from:"BIOUMS",sc:"extreme"},
+
   {tower:"TogM", from:"BIOUMS",sc:"extreme"},
+
   {tower:"SoT&T", from:"BIOUMS",sc:"extreme"},
+
   {tower:"Tom", from:"BIOUMS",sc:"teriffying"},
+
   {tower:"MIKU", from:"BIOUMS",sc:"teriffying"},
+
   {tower:"ToPDoG", from:"BIOUMS",sc:"catastrophic"},
+
   {tower:"Topp", from:"BIOUMS",sc:"horrific"},
+
   {tower:"Tosp", from:"BIOUMS",sc:"horrific"},
+
   {tower:"ToSC", from:"BIOUMS",sc:"horrific"},
+
   {tower:"HjHT", from:"BIOUMS",sc:"Eschaton"},
+
   {tower:"CoW", from:"BIOUMS",sc:"teriffying"},
+
   {tower:"#PTR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R1TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#FRTR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R2TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#GoETR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R3TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R4TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#SATR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R5TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R14MTR", from:"Great Inferno Tower Rush"},
+
   {tower:"#LRTR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R6TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#ATwTR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R7TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R8TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#TSATR", from:"Great Inferno Tower Rush"},
+
   {tower:"#R9TR", from:"Great Inferno Tower Rush"},
+
   {tower:"#Z1TR", from:"Spatial System Tower Rush"},
+
   {tower:"#SHTR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z2TR", from:"Spatial System Tower Rush"},
+
   {tower:"#AATR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z3TR", from:"Spatial System Tower Rush"},
+
   {tower:"#PATR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z4TR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z5TR", from:"Spatial System Tower Rush"},
+
   {tower:"#DSotMTR(ok)", from:"Spatial System Tower Rush"},
+
   {tower:"#Z6TR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z7TR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z8TR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z9TR", from:"Spatial System Tower Rush"},
+
   {tower:"#Z10TR", from:"Spatial System Tower Rush"},
+
   {tower:"#TLCTR", from:"Windswept Peak Tower Rush"},
+
   {tower:"#TLSTR", from:"Windswept Peak Tower Rush"},
+
   {tower:"#TLTTR", from:"Windswept Peak Tower Rush"},
+
   {tower:"#TLNTR", from:"Windswept Peak Tower Rush"},
+
   {tower:"#LFTR", from:"Windswept Peak Tower Rush"},
+
   {tower:"#SoMTR", from:"Windswept Peak Tower Rush"},
+
   {tower:"#PoMTR", from:"Windswept Peak Tower Rush"},
+
 ];
+
 const easterEggs=[{text:"Rickroll!",chance:0.05,video:"https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&autoplay=1"},
+
   {text:"Я одинок2",chance:0.03,video:"https://www.youtube.com/embed//ROe_1eqd-OY?rel=0&autoplay=1"}
+
 ];
+
+
+
+const tipsList = [
+
+  "💡 Pro Tip: Don't join EToH.",
+
+  "💡 Tip: Subscribe to @S1mclick on Youtube!",
+
+  "💡 Tip: Try to click on the cards.",
+
+  "💡 Tip: No filters = no result (don’t forget that)",
+
+  "💡 Tip: Women don't play EToH.",
+
+];
+
+
+
+const daily = getTowerOfTheDay();
+
+document.getElementById("dailyTower").innerText =
+
+  "📅 Tower of the Day: " + daily.tower + " (" + daily.from + ")";
+
+
+
+function showTip(){
+
+  const tipBox = document.getElementById("tips");
+
+  const randomTip = tipsList[Math.floor(Math.random() * tipsList.length)];
+
+
+
+  tipBox.innerText = randomTip;
+
+  tipBox.classList.add("show");
+
+
+
+  setTimeout(() => {
+
+    tipBox.classList.remove("show");
+
+  }, 4000);
+
+}
+
+
+
+function getTowerOfTheDay(){
+
+  const today = new Date();
+
+
+
+  // уникальное число дня (одинаковое для всех)
+
+  const seed = today.getFullYear() * 1000 + today.getMonth() * 50 + today.getDate();
+
+
+
+  // псевдо-рандом на основе даты
+
+  const index = seed % List.length;
+
+
+
+  return List[index];
+
+}
+
+
+
+function showFinalCardAnimation(possibleTexts){
+
+  const cardsDiv = document.getElementById("cards");
+
+  if(!cardsDiv.children.length) return;
+
+
+
+  const cardIndex = Math.floor(Math.random()*cardsDiv.children.length);
+
+  const card = cardsDiv.children[cardIndex];
+
+  const rect = card.getBoundingClientRect();
+
+  const clone = card.cloneNode(true);
+
+
+
+  // Клон
+
+  clone.style.position = "fixed";
+
+  clone.style.top = rect.top+"px";
+
+  clone.style.left = rect.left+"px";
+
+  clone.style.margin="0";
+
+  clone.style.transform="rotateY(180deg) scale(1)";
+
+  clone.style.zIndex="999";
+
+  clone.style.transition="none";
+
+  clone.style.display="flex";
+
+  clone.style.alignItems="center";
+
+  clone.style.justifyContent="center";
+
+  clone.style.fontWeight="bold";
+
+  clone.style.fontSize="22px";
+
+  clone.style.background="rgba(20,20,20,0.9)";
+
+  clone.style.border="2px solid white";
+
+  clone.style.borderRadius="16px";
+
+  clone.innerText="?";
+
+  document.body.appendChild(clone);
+
+  card.style.visibility="hidden";
+
+
+
+  // Overlay
+
+  let overlay=document.getElementById("screenOverlay");
+
+  if(!overlay){
+
+    overlay=document.createElement("div");
+
+    overlay.id="screenOverlay";
+
+    overlay.style.position="fixed";
+
+    overlay.style.top="0"; overlay.style.left="0";
+
+    overlay.style.width="100%"; overlay.style.height="100%";
+
+    overlay.style.background="rgba(0,0,0,0)";
+
+    overlay.style.zIndex="900";
+
+    overlay.style.transition="background 0.5s";
+
+    document.body.appendChild(overlay);
+
+  }
+
+
+
+  // Плавный полёт в центр
+
+  setTimeout(()=>{
+
+    overlay.style.background="rgba(0,0,0,0.6)";
+
+    const centerX = window.innerWidth/2 - rect.width/2;
+
+    const centerY = window.innerHeight/2 - rect.height/2;
+
+    clone.style.transition="all 0.7s ease";
+
+    clone.style.top=centerY+"px";
+
+    clone.style.left=centerX+"px";
+
+    clone.style.transform="rotateY(180deg) scale(1.5)";
+
+  },50);
+
+
+
+  // Медленный переворот
+
+  setTimeout(()=>{
+
+    clone.style.transition="transform 0.8s ease";
+
+    clone.style.transform="rotateY(0deg) scale(1.7)";
+
+  },700);
+
+
+
+  // Показ текста / пасхалки
+
+  setTimeout(()=>{
+
+    let finalText="?";
+
+    if(possibleTexts && possibleTexts.length){
+
+      finalText = possibleTexts[Math.floor(Math.random()*possibleTexts.length)];
+
+    }
+
+    clone.innerText=finalText;
+
+
+
+    // Bounce / shake
+
+    clone.style.transition="transform 0.2s ease";
+
+    clone.style.transform="rotateY(0deg) scale(1.8)";
+
+    setTimeout(()=>{ clone.style.transform="rotateY(0deg) scale(1.7)"; },200);
+
+  },1500);
+
+
+
+  // Возврат карточки
+
+  setTimeout(()=>{
+
+    clone.style.transition="all 0.7s ease";
+
+    clone.style.top=rect.top+"px";
+
+    clone.style.left=rect.left+"px";
+
+    clone.style.transform="rotateY(180deg) scale(1)";
+
+    overlay.style.background="rgba(0,0,0,0)";
+
+  },2500);
+
+
+
+  // Убираем клон
+
+  setTimeout(()=>{
+
+    clone.remove();
+
+    card.style.visibility="visible";
+
+  },3300);
+
+}
+
+
+
+// каждые 10 секунд
+
+setInterval(showTip, 10000);
+
+
 
 function getType(name){ if(name.startsWith("T")) return "Tower"; if(name.startsWith("S")) return "Steeple"; if(name.startsWith("C")) return "Citadel"; if(name.startsWith("#")) return "Tower Rush"; return "Another towers"; }
 
+
+
 // CREATE FILTERS
+
 function createFilterList(containerId, values){
+
   const container=document.getElementById(containerId);
+
   values.forEach(val=>{
+
     const div=document.createElement("div");
+
     div.className="option";
+
     div.innerText=val;
+
     div.dataset.value=val;
+
     div.addEventListener("click",()=>{div.classList.toggle("active");});
+
     container.appendChild(div);
+
   });
+
 }
+
 createFilterList("fromFilters",[...new Set(List.map(t=>t.from))]);
+
 createFilterList("typeFilters",[...new Set(List.map(t=>getType(t.tower)))]);
+
 createFilterList("scFilters",[...new Set(List.map(t=>t.sc).filter(s=>s))]);
 
+
+
 // START SELECTION
+
 // Глобальная переменная для таймера выбора
+
 let selectionInterval = null;
 
+
+
 function start(){
+
   const selectedFrom=[...document.querySelectorAll("#fromFilters .option.active")].map(e=>e.dataset.value);
+
   const selectedType=[...document.querySelectorAll("#typeFilters .option.active")].map(e=>e.dataset.value);
+
   const selectedSC=[...document.querySelectorAll("#scFilters .option.active")].map(e=>e.dataset.value);
 
+
+
   const result=document.getElementById("result");
+
   const cardsDiv=document.getElementById("cards");
+
   cardsDiv.innerHTML=""; 
+
   result.innerText="Selecting...";
 
+
+
   // Если ни одна галочка не выбрана во всех фильтрах
+
   if(selectedFrom.length===0 && selectedType.length===0 && selectedSC.length===0){
+
     result.innerText="Nothing found, please check filters.";
+
     return;
+
   }
+
+
 
   const filtered = List.filter(t=>{
+
     const type=getType(t.tower);
+
     let okFrom = selectedFrom.length===0 || selectedFrom.includes(t.from);
+
     let okType = selectedType.length===0 || selectedType.includes(type);
+
     let hasSC = !!t.sc;
+
     let okSC = false;
+
     if(selectedSC.length===0){ okSC = true; }
+
     else if(hasSC){ okSC = selectedSC.includes(t.sc); }
+
     else { okSC = false; }
+
     return okFrom && okType && okSC;
+
   });
+
+
 
   if(filtered.length===0){
+
     result.innerText="Nothing found, please check filters.";
+
     return;
+
   }
 
+
+
   const elements = filtered.map(t=>{
+
     const el=document.createElement("div");
+
     el.className="card"; 
+
     el.innerText=t.tower;
+
     el.addEventListener("click",()=>{
+
       // Easter Egg check
+
       easterEggs.forEach(e=>{
+
         if(Math.random()<e.chance){
+
           document.getElementById("myVideoPlayer").src=e.video;
+
         }
+
       });
+
     });
+
     cardsDiv.appendChild(el); 
+
     return el;
+
   });
 
+
+
   // Очищаем предыдущий интервал, если он есть
+
   if(selectionInterval) clearInterval(selectionInterval);
 
+
+
   // Анимация выбора
+
   let i=0;
+
+  let current = 0;
+
   selectionInterval = setInterval(()=>{
+
     elements.forEach(e=>e.classList.remove('selected'));
-    const current = Math.floor(Math.random()*elements.length);
+
+    current = Math.floor(Math.random()*elements.length);
+
     elements[current].classList.add('selected');
+
     i++;
-    if(i>30){ 
-      clearInterval(selectionInterval); 
-      selectionInterval = null; // сбрасываем переменную
-      result.innerText="🎯 Selected: " + elements[current].innerText; 
+
+
+
+    if(i>30){
+
+      clearInterval(selectionInterval); // ✅ здесь правильная очистка
+
+
+
+      const selectedText = elements[current].innerText;
+
+
+
+      result.innerText="🎯 Selected: " + selectedText;
+
+
+
+      showFinalCard(selectedText);
+
     }
+
   },100);
+
 }
 
+
+
+
+
+
+
 // AUDIO
+
 const tracks = [
+
   "https://www.dropbox.com/scl/fi/4suf46e9jsposa37mncwl/2_5238061227082543185.m4a?rlkey=lavetq39ol4f1kcx2ddmqk0bh&st=9y282dwf&dl=1",
+
   "https://www.dropbox.com/scl/fi/p6jzf2fhdecgwnc0d5aog/2_5237876955805673543.m4a?rlkey=m8q3vt039q7ki1ilbdk0cbdt9&st=wkt1vw3f&dl=1",
+
   "https://www.dropbox.com/scl/fi/tsl4vguhtcknmlw8mz4wn/4_5886666095540050725-1.mp3?rlkey=fh86gzq0a3yc48tnzl61n5dq4&st=bm5nx1jq&dl=1",
+
   "https://www.dropbox.com/scl/fi/ia8u1v4vfyo0sl63nmc1a/2_5357560681979742822.m4a?rlkey=bejkxfqcverbhyvkm5gjr59lr&st=2ag3xvfq&dl=1",
+
   "https://www.dropbox.com/scl/fi/afyhic7ywi433uijcjtgt/Miyagi-Andy-Panda-Kosandra-Official-Audio.mp4?rlkey=mfv7aymz3u33xpx06j8zboyy1&st=7mxs5xdg&dl=1",
+
 ];
+
+
 
 const audio = document.getElementById("audioAtmos");
 
+
+
 // Случайная песня
+
 const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+
 audio.src = randomTrack;
+
 audio.volume = 0.1;
 
+
+
 // Воспроизведение по клику
+
 document.body.addEventListener("click", () => { audio.play(); }, {once:true});
+
 </script>
+
 </body>
+
 </html>
