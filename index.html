@@ -830,9 +830,22 @@ function start(){
 }
 
 // AUDIO
-const audio=document.getElementById("audioAtmos");
-audio.volume=0.2; // потише
-document.body.addEventListener("click",()=>{audio.play();},{once:true});
+const tracks = [
+  "https://www.dropbox.com/scl/fi/4suf46e9jsposa37mncwl/2_5238061227082543185.m4a?rlkey=lavetq39ol4f1kcx2ddmqk0bh&st=9y282dwf&dl=1",
+  "https://www.dropbox.com/scl/fi/p6jzf2fhdecgwnc0d5aog/2_5237876955805673543.m4a?rlkey=m8q3vt039q7ki1ilbdk0cbdt9&st=wkt1vw3f&dl=1",
+  "https://www.dropbox.com/scl/fi/tsl4vguhtcknmlw8mz4wn/4_5886666095540050725-1.mp3?rlkey=fh86gzq0a3yc48tnzl61n5dq4&st=bm5nx1jq&dl=1",
+  "https://www.dropbox.com/scl/fi/ia8u1v4vfyo0sl63nmc1a/2_5357560681979742822.m4a?rlkey=bejkxfqcverbhyvkm5gjr59lr&st=2ag3xvfq&dl=1"
+];
+
+const audio = document.getElementById("audioAtmos");
+
+// Случайная песня
+const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+audio.src = randomTrack;
+audio.volume = 0.05;
+
+// Воспроизведение по клику
+document.body.addEventListener("click", () => { audio.play(); }, {once:true});
 </script>
 </body>
 </html>
