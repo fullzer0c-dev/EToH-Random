@@ -2407,6 +2407,32 @@ const List = [
   {tower:"#CoTSFT",from:"Scope 4",},
   {tower:"#S4TR",from:"Scope 4",},
   {tower:"#TS4TR",from:"Scope 4",},
+
+  {tower:"CoDA",from:"Plate 1",sc:"Mysery"},
+  {tower:"ToTL",from:"Plate 1",sc:"Effortless"},
+  {tower:"RoEJ",from:"Plate 1",sc:"Effortless"},
+  {tower:"NS",from:"Plate 1",sc:"Easy"},
+  {tower:"ToHYChV",from:"Plate 1",sc:"Easy"},
+  {tower:"CNaT",from:"Plate 1",sc:"Easy"},
+  {tower:"EoQ",from:"Plate 1",sc:"Medium"},
+  {tower:"ToTMTMT",from:"Plate 1",sc:"Hard"},
+  {tower:"VSSS",from:"Plate 1",sc:"Hard"},
+  {tower:"ToE",from:"Plate 1",sc:"Hard"},
+  {tower:"OFP",from:"Plate 1",sc:"Difficult"},
+  {tower:"SoOB",from:"Plate 1",sc:"Difficult"},
+  {tower:"FNaT's",from:"Plate 1",sc:"Challenging"},
+  {tower:"CoKE",from:"Plate 1",sc:"Challenging"},
+  {tower:"NEaLoDC",from:"Plate 1",sc:"Challenging"},
+  {tower:"JToH Ring 9",from:"Plate 1",sc:"Challenging"},
+  {tower:"Hell",from:"Plate 1",sc:"Intense"},
+  {tower:"ToPE",from:"Plate 1",sc:"Intense"},
+  {tower:"ToHUM",from:"Plate 1",sc:"Intense"},
+  {tower:"ToPSfT4A",from:"Plate 1",sc:"Remorseless"},
+  {tower:"RoHJ",from:"Plate 1",sc:"Remorseless"},
+  {tower:"ToDT",from:"Plate 1",sc:"Remorseless"},
+  {tower:"PoS",from:"Plate 1",sc:"insane"},
+  {tower:"HH",from:"Plate 1",sc:"extreme"},
+  {tower:"SD",from:"Plate 1",sc:"teriffying"},
 ];
 
 const easterEggs=[{text:"Rickroll!",chance:0.05,video:"https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&autoplay=1"},
@@ -2773,7 +2799,7 @@ setInterval(showTip, 10000);
 
 
 
-function getType(name){ if(name.startsWith("T")) return "Tower"; if(name.startsWith("S")) return "Steeple"; if(name.startsWith("C")) return "Citadel"; if(name.startsWith("#")) return "Tower Rush"; return "Another towers"; }
+function getType(name){ if(name.startsWith("T")) return "Tower"; if(name.startsWith("S")) return "Steeple"; if(name.startsWith("C")) return "Citadel"; if(name.startsWith("#")) return "Tower Rush";if(name.startsWith("O")) return "Obelisk"; if(name.startsWith("R")) return "Room";return "Another towers"; }
 
 
 
