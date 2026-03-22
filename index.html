@@ -767,6 +767,9 @@ createFilterList("typeFilters",[...new Set(List.map(t=>getType(t.tower)))]);
 createFilterList("scFilters",[...new Set(List.map(t=>t.sc).filter(s=>s))]);
 
 // START SELECTION
+// Глобальная переменная для таймера выбора
+let selectionInterval = null;
+
 function start(){
   const selectedFrom=[...document.querySelectorAll("#fromFilters .option.active")].map(e=>e.dataset.value);
   const selectedType=[...document.querySelectorAll("#typeFilters .option.active")].map(e=>e.dataset.value);
@@ -787,13 +790,11 @@ function start(){
     const type=getType(t.tower);
     let okFrom = selectedFrom.length===0 || selectedFrom.includes(t.from);
     let okType = selectedType.length===0 || selectedType.includes(type);
-
-    // SC логика: если галочка выбрана, показываем только SC; если не выбрана, показываем и обычные
     let hasSC = !!t.sc;
     let okSC = false;
-    if(selectedSC.length===0){ okSC = true; } // все показываем
-    else if(hasSC){ okSC = selectedSC.includes(t.sc); } // SC совпадает
-    else { okSC = false; } // обычный без SC, если SC фильтр есть — не показываем
+    if(selectedSC.length===0){ okSC = true; }
+    else if(hasSC){ okSC = selectedSC.includes(t.sc); }
+    else { okSC = false; }
     return okFrom && okType && okSC;
   });
 
@@ -818,14 +819,21 @@ function start(){
     return el;
   });
 
+  // Очищаем предыдущий интервал, если он есть
+  if(selectionInterval) clearInterval(selectionInterval);
+
   // Анимация выбора
-  let i=0,current=0;
-  const anim=setInterval(()=>{
+  let i=0;
+  selectionInterval = setInterval(()=>{
     elements.forEach(e=>e.classList.remove('selected'));
-    current=Math.floor(Math.random()*elements.length);
+    const current = Math.floor(Math.random()*elements.length);
     elements[current].classList.add('selected');
     i++;
-    if(i>30){ clearInterval(anim); result.innerText="🎯 Selected: " + elements[current].innerText; }
+    if(i>30){ 
+      clearInterval(selectionInterval); 
+      selectionInterval = null; // сбрасываем переменную
+      result.innerText="🎯 Selected: " + elements[current].innerText; 
+    }
   },100);
 }
 
