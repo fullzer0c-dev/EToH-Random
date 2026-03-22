@@ -60,7 +60,7 @@ h2 { text-shadow:0 0 10px white; }
 
 .filter-wrapper { 
 
-  display:flex; flex-direction:column; border:2px solid white; border-radius:12px; background:rgba(20,20,20,0.6); padding:10px; max-height:200px; overflow-y:auto; width:220px; 
+  display:flex; flex-direction:column; border:2px solid white; border-radius:20px; background:rgba(20,20,20,0.6); padding:10px; max-height:200px; overflow-y:auto; width:220px; 
 
 }
 
@@ -76,13 +76,45 @@ h2 { text-shadow:0 0 10px white; }
 
 /* Cards */
 
-#cardsWrapper { width:80%; max-width:900px; height:300px; margin:20px auto; overflow-y:auto; border:2px solid white; border-radius:12px; backdrop-filter:blur(6px); box-shadow:0 0 15px white; background:rgba(0,0,0,0.4); }
+#cardsWrapper { width:80%; max-width:900px; height:300px; margin:20px auto; overflow-y:auto; border:2px solid white; border-radius:12px; backdrop-filter:blur(6px); box-shadow: 0 0 15px rgba(255,255,255,0.2) white; background:rgba(0,0,0,0.4); }
 
 #cards { display:flex; flex-wrap:wrap; justify-content:center; padding:10px; }
 
-.card { width:120px; height:150px; margin:10px; display:flex; align-items:center; justify-content:center; background:rgba(20,20,20,0.8); border:2px solid white; border-radius:12px; backdrop-filter:blur(10px); box-shadow:0 0 10px white; transform:scale(0); animation:pop 0.4s forwards; font-weight:bold; cursor:pointer; text-align:center; transition: transform 0.3s, box-shadow 0.3s, background 0.3s; }
+.card {
+  width:120px;
+  height:150px;
+  margin:10px;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
 
-.card:hover { transform:scale(1.15); box-shadow:0 0 25px white; background:rgba(50,50,50,0.9); }
+  border:2px solid rgba(255,255,255,0.2);
+  border-radius:20px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.02)
+  );
+
+  backdrop-filter: blur(12px);
+
+  box-shadow: 0 0 15px rgba(255,255,255,0.2);
+
+  transform:scale(0);
+  animation:pop 0.4s forwards;
+
+  cursor:pointer;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 25px rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.1);
+}
 
 .card.selected { background:white; color:black; transform:scale(1.2); box-shadow:0 0 25px white; }
 
@@ -2915,7 +2947,11 @@ function start(){
 
     el.className="card"; 
 
-    el.innerText=t.tower;
+    el.innerHTML = `
+      <div style="font-size:16px;">${t.tower}</div>
+      <div style="font-size:11px; opacity:0.7;">(${t.from})</div>
+      <div style="font-size:10px; opacity:0.5;">${t.sc || ""}</div>
+      `;
 
     el.addEventListener("click",()=>{
 
@@ -2971,7 +3007,9 @@ function start(){
 
 
 
-      const selectedText = elements[current].innerText;
+      const selectedTower = filtered[current];
+
+      const selectedText = `${selectedTower.tower} (${selectedTower.from})`;
 
 
 
@@ -3021,7 +3059,7 @@ const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
 
 audio.src = randomTrack;
 
-audio.volume = 0.1;
+audio.volume = 0.001;
 
 
 
