@@ -350,6 +350,104 @@ button#selectButton:hover { box-shadow:0 0 30px white; background:rgba(50,50,50,
 
 
 
+/* КНОПКИ В УГЛАХ */
+#miniGameBtn, #nextTrackBtn {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  cursor:pointer;
+
+  border-radius:20px;
+  border:2px solid rgba(255,255,255,0.2);
+
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.02)
+  );
+
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 15px rgba(255,255,255,0.2);
+
+  transition:0.3s;
+  z-index:999;
+}
+
+#miniGameBtn { bottom:20px; left:20px; }
+#nextTrackBtn { bottom:20px; right:20px; }
+
+#miniGameBtn:hover, #nextTrackBtn:hover {
+  transform:scale(1.1);
+  box-shadow:0 0 25px rgba(255,255,255,0.4);
+}
+
+/* ОКНО ИГРЫ */
+#miniGameWindow {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+
+#miniGameContent {
+  width:300px;
+  padding:20px;
+  text-align:center;
+
+  border-radius:20px;
+  border:2px solid rgba(255,255,255,0.2);
+
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+
+#gameArea {
+  width:250px;
+  height:250px;
+  background:rgba(255,255,255,0.05);
+  margin:10px auto;
+  position:relative;
+  overflow:hidden;
+  border-radius:12px;
+}
+
+.star {
+  position:absolute;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.gameCloseBtn {
+  margin-top:10px;
+  padding:10px;
+
+  border-radius:12px;
+  border:2px solid rgba(255,255,255,0.2);
+
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+
+  box-shadow:0 0 10px rgba(255,255,255,0.2);
+
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.gameCloseBtn:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(255,255,255,0.4);
+}
+
+
 </style>
 
 </head>
@@ -418,17 +516,32 @@ button#selectButton:hover { box-shadow:0 0 30px white; background:rgba(50,50,50,
 
 <div id="myVideoWrapper">
 
-  <iframe id="myVideoPlayer" src="https://www.youtube.com/embed/nj3CE2Y5dYE?autoplay=0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+  <iframe id="myVideoPlayer" src="https://youtu.be/embed/GUhYRSWZW18?autoplay=0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
 </div>
 
+<!-- MINI GAME BUTTON -->
+<div id="miniGameBtn">🎮</div>
+
+<!-- NEXT MUSIC BUTTON -->
+<div id="nextTrackBtn">⏭</div>
+
+<!-- MINI GAME WINDOW -->
+<div id="miniGameWindow">
+  <div id="miniGameContent">
+    <h3>❄Catch a Snowflake!❄ </h3>
+    <p>Score: <span id="score">0</span></p>
+    <div id="gameArea"></div>
+    <div class="gameCloseBtn" onclick="closeGame()">✖</div>
+  </div>
+</div>
 
 
 
 
 <audio id="audioAtmos" loop>
 
-  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  <source src="https://www.dropbox.com/scl/fi/4suf46e9jsposa37mncwl/2_5238061227082543185.m4a?rlkey=lavetq39ol4f1kcx2ddmqk0bh&st=9y282dwf&dl=1" type="audio/mpeg">
 
 </audio>
 
@@ -3051,25 +3164,62 @@ const tracks = [
 
 ];
 
-
-
 const audio = document.getElementById("audioAtmos");
+audio.volume = 0.01
 
+document.body.addEventListener("click", () => {
+  audio.volume = 0.005; // фикс громкости
+  audio.play().catch(()=>{});
+}, {once:true});
 
+document.getElementById("nextTrackBtn").onclick = () => {
+  const random = tracks[Math.floor(Math.random()*tracks.length)];
+  audio.src = random;
+  audio.volume = 0.005; // фикс
+  audio.play();
 
-// Случайная песня
+};
 
-const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+// ===== MINI GAME =====
+let score = 0;
+let gameInterval;
 
-audio.src = randomTrack;
+document.getElementById("miniGameBtn").onclick = () => {
+  document.getElementById("miniGameWindow").style.display = "flex";
+  startGame();
+};
 
-audio.volume = 0.001;
+function closeGame(){
+  document.getElementById("miniGameWindow").style.display = "none";
+  clearInterval(gameInterval);
+}
 
+function startGame(){
+  const area = document.getElementById("gameArea");
+  score = 0;
+  document.getElementById("score").innerText = score;
+  area.innerHTML = "";
 
+  gameInterval = setInterval(()=>{
+    const star = document.createElement("div");
+    star.className = "star";
+    star.innerText = "❄";
 
-// Воспроизведение по клику
+    star.style.top = Math.random()*220 + "px";
+    star.style.left = Math.random()*220 + "px";
 
-document.body.addEventListener("click", () => { audio.play(); }, {once:true});
+    star.onclick = () => {
+      score++;
+      document.getElementById("score").innerText = score;
+      star.remove();
+    };
+
+    area.appendChild(star);
+
+    setTimeout(()=>{ star.remove(); }, 1000);
+
+  }, 600);
+}
 
 </script>
 
